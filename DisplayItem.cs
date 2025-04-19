@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using SupCom2ModPackager.Extensions;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 
@@ -15,9 +16,17 @@ public class DisplayItemCollection : ObservableCollection<DisplayItem>
     public DisplayItemCollection()
     {
     }
+
+    public DisplayItem Add(DisplayItemType displayType, string path, string? name = null)
+    {
+        var item = new DisplayItem(this, displayType, path, name);
+        Add(item);
+        return item;
+    }
 }
 public class DisplayItem : INotifyPropertyChanged
 {
+    private readonly DisplayItemCollection collection;
     private readonly DisplayItemType _displayType;
     public string Name { get; private set; }
     public string Path { get; private set; }
@@ -47,8 +56,9 @@ public class DisplayItem : INotifyPropertyChanged
         };
     }
 
-    public DisplayItem(DisplayItemType displayType, string path, string? name = null)
+    public DisplayItem(DisplayItemCollection collection, DisplayItemType displayType, string path, string? name = null)
     {
+        this.collection = collection;
         _displayType = displayType;
         Path = path;
         this.Name = name ?? System.IO.Path.GetFileName(path);
@@ -66,7 +76,9 @@ public class DisplayItem : INotifyPropertyChanged
 
     private string GetDirectoryAction()
     {
-        return string.Empty;
+        var compressedFileName = this.Path.GetCompressedFileName();
+        var action = string.IsNullOrEmpty(compressedFileName) ? string.Empty : "Pack";
+        return action;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

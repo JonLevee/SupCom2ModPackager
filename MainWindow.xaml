@@ -27,7 +27,9 @@
         <StackPanel Margin="0,0,0,-385">
             <controls:PathLinkControl x:Name="PathLink" />
             <DataGrid x:Name="PathDataGrid" AutoGenerateColumns="False" Margin="0,0,0,0" Height="370" 
-                      MouseLeftButtonUp="ActionClicked" SelectionMode="Single" SelectionUnit="Cell">
+                      MouseLeftButtonUp="ActionClicked" SelectionMode="Single" SelectionUnit="Cell"
+                      Sorting="PathDataGrid_Sorting"
+                      >
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="Background" Value="Transparent" />

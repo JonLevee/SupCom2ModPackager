@@ -11,5 +11,12 @@ namespace SupCom2ModPackager.Extensions
             var extension = Path.GetExtension(fileName)?.ToLowerInvariant();
             return extension != null && CompressedExtensions.Contains(extension);
         }
+
+        public static string? GetCompressedFileName(this string directory)
+        {
+            return CompressedExtensions
+                .Select(ext => Path.ChangeExtension(directory, ext))
+                .FirstOrDefault(File.Exists);
+        }
     }
 }

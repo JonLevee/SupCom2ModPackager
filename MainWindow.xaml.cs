@@ -1,9 +1,11 @@
 ﻿using SupCom2ModPackager.Extensions;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace SupCom2ModPackager;
@@ -21,6 +23,12 @@ public partial class MainWindow : Window
         PathDataGrid.ItemsSource = _items;
         PathDataGrid.CanUserSortColumns = true;
         PathLink.PathChanged += PathLink_PathChanged;
+        // Automatically sort the DataGrid by Name
+        var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
+        collectionView.SortDescriptions.Clear();
+        collectionView.SortDescriptions.Add(new SortDescription(nameof(DisplayItem.Name), ListSortDirection.Ascending));
+        collectionView.Refresh();
+
 
         var path = DriveInfo
             .GetDrives()
@@ -33,14 +41,14 @@ public partial class MainWindow : Window
     private void PathLink_PathChanged(object? sender, string newPath)
     {
         _items.Clear();
-        _items.Add(new DisplayItem(DisplayItemType.Directory, newPath, "..."));
+        _items.Add(DisplayItemType.Directory, newPath, "...");
         foreach (var dir in Directory.GetDirectories(newPath))
         {
-            _items.Add(new DisplayItem(DisplayItemType.Directory, dir));
+            _items.Add(DisplayItemType.Directory, dir);
         }
         foreach (var file in Directory.GetFiles(newPath))
         {
-            _items.Add(new DisplayItem(DisplayItemType.File, file));
+            _items.Add(DisplayItemType.File, file);
         }
     }
 
@@ -85,6 +93,15 @@ public partial class MainWindow : Window
                 //}
                 ((IProgress<string>)progress).Report("Removing folder ...");
                 await Task.Run(() => Directory.Delete(directory, true));
+
+            }
+            var targetDirectory = _items.FirstOrDefault(dirItem => string.Equals(directory, dirItem.Path, StringComparison.OrdinalIgnoreCase));
+            if (targetDirectory == null)
+            {
+                Directory.CreateDirectory(directory);
+                targetDirectory = _items.Add(DisplayItemType.Directory, directory);
+                
+                await Task.CompletedTask;
             }
 
 
@@ -170,5 +187,10 @@ public partial class MainWindow : Window
                 await UnpackAsync(filePath, progress);
             }
         }
+    }
+
+    private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+
     }
 }
