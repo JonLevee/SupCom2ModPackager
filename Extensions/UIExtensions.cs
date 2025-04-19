@@ -13,7 +13,7 @@ namespace SupCom2ModPackager.Extensions
         /// <summary>
         /// Returns a first ancestor of the provided type.
         /// </summary>
-        public static Visual GetAncestorOfType(this Visual element, Type type)
+        public static Visual? GetAncestorOfType(this Visual element, Type type)
         {
             if (element == null)
                 return null;

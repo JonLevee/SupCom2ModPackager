@@ -1,4 +1,5 @@
 ﻿using SupCom2ModPackager.Extensions;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -16,10 +17,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ExtractionProgress.Visibility = Visibility.Visible;
+
         PathDataGrid.ItemsSource = _items;
         PathDataGrid.CanUserSortColumns = true;
         PathLink.PathChanged += PathLink_PathChanged;
-        PathLink.Path = @"C:\SC2Mods\Testing";
+
+        var path = DriveInfo
+            .GetDrives()
+            .Where(d => d.IsReady && d.DriveType == DriveType.Fixed)
+            .Select(d => @$"{d.Name}SC2Mods\Testing")
+            .First(Directory.Exists);
+        PathLink.Path = path;
     }
 
     private void PathLink_PathChanged(object? sender, string newPath)
@@ -36,10 +45,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ActionClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private async void ActionClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         DataGrid myGrid = (DataGrid)sender;
-        // Get the mouse position relative to the DataGrid
         Point mousePos = e.GetPosition(myGrid);
 
         var element = myGrid.InputHitTest(mousePos) as Visual;
@@ -48,17 +56,17 @@ public partial class MainWindow : Window
         {
             return;
         }
+
         var cellHeader = myGrid.Columns[cell.Column.DisplayIndex];
         if (cellHeader.Header.ToString() != "Action")
         {
             return;
         }
 
-        var row = (DataGridRow)((TextBlock)element).BindingGroup.Owner;
-        var item = (DisplayItem)row.Item;
+        var item = (DisplayItem)((DataGridRow)cell.BindingGroup.Owner).Item;
         if (item.Action == "Unpack")
         {
-             var directory = Path.ChangeExtension(item.Path, null);
+            var directory = Path.ChangeExtension(item.Path, null);
             if (Directory.Exists(directory))
             {
                 var result = MessageBox.Show("Overwrite directory?", "Unpack will overwrite existing directory", MessageBoxButton.OKCancel);
@@ -68,12 +76,92 @@ public partial class MainWindow : Window
                 }
                 Directory.Delete(directory, true);
             }
-            // Handle unpack action
-            using (var zipFile = ZipFile.OpenRead(item.Path))
-            {
 
+            // Show the progress overlay
+            // Create a progress reporter
+            var progress = new Progress<string>(text =>
+            {
+                ++ExtractionProgressBar.Value;
+                CurrentFileTextBlock.Text = text;
+            });
+
+            ExtractionProgress.Visibility = Visibility.Visible;
+            ExtractionProgressBar.Value = -1;
+            ((IProgress<string>)progress).Report("Scanning ...");
+
+            ExtractionProgressBar.Maximum = GetCountForAllEntries(item.Path);
+
+            // Perform the extraction
+            await UnpackAsync(item.Path, progress);
+
+            // Reset UI after completion
+            ExtractionProgress.Visibility = Visibility.Hidden;
+        }
+    }
+
+    private static int GetCountForAllEntries(string path)
+    {
+        if (!path.IsCompressedFile())
+        {
+            return 0;
+        }
+        using var zipFile = ZipFile.OpenRead(path);
+        var count = GetCountForAllEntries(zipFile);
+        return count;
+    }
+
+    private static int GetCountForAllEntries(ZipArchive archive)
+    {
+        int count = 0;
+        foreach (var entry in archive.Entries)
+        {
+            ++count;
+
+            // Check if the entry is a nested zip file
+            if (entry.FullName.IsCompressedFile())
+            {
+                using var nestedStream = entry.Open();
+                using var nestedArchive = new ZipArchive(nestedStream, ZipArchiveMode.Read);
+                count += GetCountForAllEntries(nestedArchive);
             }
+        }
+        return count;
+    }
+
+    private static async Task UnpackAsync(string path, IProgress<string> progress)
+    {
+        if (!path.IsCompressedFile())
+        {
             return;
+        }
+
+        var directory = Path.ChangeExtension(path, null);
+        Directory.CreateDirectory(directory);
+
+        using (var zipFile = ZipFile.OpenRead(path))
+        {
+            foreach (var entry in zipFile.Entries)
+            {
+                if (entry.FullName.EndsWith("/"))
+                {
+                    continue;
+                }
+
+                var filePath = Path.Combine(directory, entry.FullName);
+                var fileDirectory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(fileDirectory) && !Directory.Exists(fileDirectory))
+                {
+                    Directory.CreateDirectory(fileDirectory);
+                }
+
+                // Extract the file
+                entry.ExtractToFile(filePath, overwrite: true);
+
+                progress.Report($"Extracting {entry.FullName}");
+
+                // Recursively unpack nested archives
+                await UnpackAsync(filePath, progress);
+            }
         }
     }
 }
