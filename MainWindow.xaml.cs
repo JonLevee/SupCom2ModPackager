@@ -17,8 +17,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        ExtractionProgress.Visibility = Visibility.Visible;
-
+        //ExtractionProgress.Visibility = Visibility.Visible;
         PathDataGrid.ItemsSource = _items;
         PathDataGrid.CanUserSortColumns = true;
         PathLink.PathChanged += PathLink_PathChanged;
@@ -66,17 +65,8 @@ public partial class MainWindow : Window
         var item = (DisplayItem)((DataGridRow)cell.BindingGroup.Owner).Item;
         if (item.Action == "Unpack")
         {
-            var directory = Path.ChangeExtension(item.Path, null);
-            if (Directory.Exists(directory))
-            {
-                var result = MessageBox.Show("Overwrite directory?", "Unpack will overwrite existing directory", MessageBoxButton.OKCancel);
-                if (result != MessageBoxResult.OK)
-                {
-                    return;
-                }
-                Directory.Delete(directory, true);
-            }
-
+            ExtractionProgress.Visibility = Visibility.Visible;
+            ExtractionProgressBar.Value = -1;
             // Show the progress overlay
             // Create a progress reporter
             var progress = new Progress<string>(text =>
@@ -85,36 +75,53 @@ public partial class MainWindow : Window
                 CurrentFileTextBlock.Text = text;
             });
 
-            ExtractionProgress.Visibility = Visibility.Visible;
-            ExtractionProgressBar.Value = -1;
-            ((IProgress<string>)progress).Report("Scanning ...");
+            var directory = Path.ChangeExtension(item.Path, null);
+            if (Directory.Exists(directory))
+            {
+                //var result = MessageBox.Show("Overwrite directory?", "Unpack will overwrite existing directory", MessageBoxButton.OKCancel);
+                //if (result != MessageBoxResult.OK)
+                //{
+                //    return;
+                //}
+                ((IProgress<string>)progress).Report("Removing folder ...");
+                await Task.Run(() => Directory.Delete(directory, true));
+            }
 
-            ExtractionProgressBar.Maximum = GetCountForAllEntries(item.Path);
+
+            ((IProgress<string>)progress).Report("Scanning ...");
+            ExtractionProgressBar.Maximum = await Task.Run(() => GetCountForAllEntries(item.Path));
 
             // Perform the extraction
-            await UnpackAsync(item.Path, progress);
+            await Task.Run(() => UnpackAsync(item.Path, progress));
 
             // Reset UI after completion
             ExtractionProgress.Visibility = Visibility.Hidden;
         }
     }
 
-    private static int GetCountForAllEntries(string path)
+    private static async Task<int> GetCountForAllEntries(string path)
     {
         if (!path.IsCompressedFile())
         {
-            return 0;
+            return await Task.FromResult(0); // Use Task.FromResult to return a completed task with a result
         }
-        using var zipFile = ZipFile.OpenRead(path);
-        var count = GetCountForAllEntries(zipFile);
-        return count;
+
+        return await Task.Run(() => // Use Task.Run to perform CPU-bound work on a background thread
+        {
+            using var zipFile = ZipFile.OpenRead(path);
+            return GetCountForAllEntries(zipFile);
+        });
     }
 
-    private static int GetCountForAllEntries(ZipArchive archive)
+    private static async Task<int> GetCountForAllEntries(ZipArchive archive)
     {
         int count = 0;
         foreach (var entry in archive.Entries)
         {
+            if (entry.FullName.EndsWith("/"))
+            {
+                continue;
+            }
             ++count;
 
             // Check if the entry is a nested zip file
@@ -122,7 +129,7 @@ public partial class MainWindow : Window
             {
                 using var nestedStream = entry.Open();
                 using var nestedArchive = new ZipArchive(nestedStream, ZipArchiveMode.Read);
-                count += GetCountForAllEntries(nestedArchive);
+                count += await GetCountForAllEntries(nestedArchive);
             }
         }
         return count;

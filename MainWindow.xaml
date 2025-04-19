@@ -7,20 +7,22 @@
         xmlns:controls="clr-namespace:SupCom2ModPackager.Controls"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="102,0,76,400">
+    <Grid Margin="10,10,10,10">
+        <!-- Margin="102,0,76,400" -->
         <!-- Floating ExtractionProgress -->
         <StackPanel 
             x:Name="ExtractionProgress" 
+            Visibility="Hidden"
             HorizontalAlignment="Center" 
             VerticalAlignment="Center" 
             Background="White" 
-            Opacity="0.9" 
-            Panel.ZIndex="2" 
+            Opacity="1" 
+            Panel.ZIndex="200" 
             Width="574" 
-            Height="114" 
-            Margin="0,180,0,0">
+            Height="45" 
+            Margin="0,100,0,0">
             <ProgressBar x:Name="ExtractionProgressBar" Height="20" Minimum="0" Maximum="100" />
-            <TextBlock x:Name="CurrentFileTextBlock" Margin="0,5,0,0" Text="Ready" TextAlignment="Center" />
+            <TextBlock x:Name="CurrentFileTextBlock" Margin="0,5,0,0" Text="Ready" TextAlignment="Left" />
         </StackPanel>
         <StackPanel Margin="0,0,0,-385">
             <controls:PathLinkControl x:Name="PathLink" />
