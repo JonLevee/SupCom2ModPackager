@@ -15,11 +15,13 @@ namespace SupCom2ModPackager;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private DisplayItemCollection _items = new DisplayItemCollection();
-    private readonly SC2ModPackager modPackager = new SC2ModPackager();
+    private DisplayItemCollection _items;
+    private readonly SC2ModPackager _modPackager;
 
-    public MainWindow()
+    public MainWindow(DisplayItemCollection items, SC2ModPackager modPackager)
     {
+        _items = items;
+        _modPackager = modPackager;
         InitializeComponent();
         //ExtractionProgress.Visibility = Visibility.Visible;
         PathDataGrid.ItemsSource = _items;
@@ -85,7 +87,7 @@ public partial class MainWindow : Window
                 CurrentFileTextBlock.Text = text;
             });
 
-            await modPackager.Unpack(item, progress);
+            await _modPackager.Unpack(item, progress);
 
             var directory = Path.ChangeExtension(item.Path, null);
             if (Directory.Exists(directory))
