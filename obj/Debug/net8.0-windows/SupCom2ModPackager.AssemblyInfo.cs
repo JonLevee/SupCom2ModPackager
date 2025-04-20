@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SupCom2ModPackager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+40f0fc7945b8e9b19bae622dbb76680fbfe02fe1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42e28a7523d8810002417ce0ffe0347825527655")]
 [assembly: System.Reflection.AssemblyProductAttribute("SupCom2ModPackager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SupCom2ModPackager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
