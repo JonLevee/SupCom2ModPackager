@@ -20,7 +20,7 @@ public partial class MainWindow : Window
     private readonly ProgressReporter progressReporter;
 
     public MainWindow(
-        DisplayItemCollection items, 
+        DisplayItemCollection items,
         SC2ModPackager modPackager,
         ProgressReporter progressReporter)
     {
@@ -89,6 +89,11 @@ public partial class MainWindow : Window
         var item = (DisplayItem)((DataGridRow)cell.BindingGroup.Owner).Item;
         if (item.Action == "Unpack")
         {
+            using (progressReporter.CreateReporter())
+            {
+                await _modPackager.Unpack(item);
+            }
+
             ExtractionProgress.Visibility = Visibility.Visible;
             ExtractionProgressBar.Value = -1;
             // Show the progress overlay
@@ -99,7 +104,6 @@ public partial class MainWindow : Window
                 CurrentFileTextBlock.Text = text;
             });
 
-            _modPackager.Unpack(item);
             await _modPackager.Unpack(item, progress);
 
 
