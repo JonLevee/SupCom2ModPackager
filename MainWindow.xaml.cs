@@ -16,6 +16,8 @@ namespace SupCom2ModPackager;
 public partial class MainWindow : Window
 {
     private DisplayItemCollection _items = new DisplayItemCollection();
+    private readonly SC2ModPackager modPackager = new SC2ModPackager();
+
     public MainWindow()
     {
         InitializeComponent();
@@ -83,6 +85,8 @@ public partial class MainWindow : Window
                 CurrentFileTextBlock.Text = text;
             });
 
+            await modPackager.Unpack(item, progress);
+
             var directory = Path.ChangeExtension(item.Path, null);
             if (Directory.Exists(directory))
             {
@@ -100,7 +104,7 @@ public partial class MainWindow : Window
             {
                 Directory.CreateDirectory(directory);
                 targetDirectory = _items.Add(DisplayItemType.Directory, directory);
-                
+
                 await Task.CompletedTask;
             }
 

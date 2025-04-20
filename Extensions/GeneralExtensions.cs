@@ -5,6 +5,7 @@ namespace SupCom2ModPackager.Extensions
     public static class GeneralExtensions
     {
         private static readonly string[] CompressedExtensions = [".zip", ".rar", ".sc2", ".scd"];
+        private static readonly string[] SupCom2Files = ["mod.zip", "meta.txt", "profile.yml"];
 
         public static bool IsCompressedFile(this string fileName)
         {
@@ -14,9 +15,20 @@ namespace SupCom2ModPackager.Extensions
 
         public static string? GetCompressedFileName(this string directory)
         {
-            return CompressedExtensions
-                .Select(ext => Path.ChangeExtension(directory, ext))
+            var compressedFile = CompressedExtensions
+                .Select(ext => directory + ext)
                 .FirstOrDefault(File.Exists);
+            return compressedFile;
+        }
+
+        public static bool IsSupCom2Directory(this string directory)
+        {
+            if (CompressedExtensions.Select(ext => directory + ext).Any(File.Exists))
+            {
+                if (SupCom2Files.All(file => File.Exists(Path.Combine(directory, file))))
+                    return true;
+            }
+            return false;
         }
     }
 }

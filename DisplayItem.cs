@@ -76,9 +76,7 @@ public class DisplayItem : INotifyPropertyChanged
 
     private string GetDirectoryAction()
     {
-        var compressedFileName = this.Path.GetCompressedFileName();
-        var action = string.IsNullOrEmpty(compressedFileName) ? string.Empty : "Pack";
-        return action;
+        return this.Path.IsSupCom2Directory() ? "Pack" : string.Empty;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
