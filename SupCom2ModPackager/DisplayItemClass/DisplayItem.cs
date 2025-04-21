@@ -5,8 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace SupCom2ModPackager.DisplayItemClass;
 
+public interface IDisplayItem : INotifyPropertyChanged
+{
+    string Name { get; }
+    string FullPath { get; }
+    DateTime Modified { get; }
+    string Action { get; }
+    bool Exists { get; }
+}
+
 [DebuggerDisplay("{Name} Exists:{Exists}")]
-public class DisplayItem : INotifyPropertyChanged
+public class DisplayItem : IDisplayItem
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 

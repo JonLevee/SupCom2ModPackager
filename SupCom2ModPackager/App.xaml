@@ -1,9 +1,8 @@
 ﻿<Application x:Class="SupCom2ModPackager.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:SupCom2ModPackager"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:SupCom2ModPackager">
     <Application.Resources>
-         
+
     </Application.Resources>
 </Application>

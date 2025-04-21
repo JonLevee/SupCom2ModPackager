@@ -21,8 +21,6 @@ namespace SupCom2ModPackager
 
                     // Register services and view models
                     services.AddSingleton<MainWindow>();
-                    services.AddSingleton<SC2ModPackager>();
-                    services.AddSingleton<DisplayItemCollection>();
                 })
                 .Build();
         }

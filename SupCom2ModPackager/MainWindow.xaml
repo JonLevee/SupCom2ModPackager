@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SupCom2ModPackager"
         xmlns:controls="clr-namespace:SupCom2ModPackager.Controls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Supreme Commander 2 Mod Packager" Height="450" Width="800">
     <Grid Margin="10,10,10,10">
         <!-- Margin="102,0,76,400" -->
         <!-- Floating ExtractionProgress -->

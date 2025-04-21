@@ -4,7 +4,7 @@ using System.IO;
 
 namespace SupCom2ModPackager.DisplayItemClass;
 
-public class DisplayItemCollection : ObservableCollection<DisplayItem>
+public class DisplayItemCollection : ObservableCollection<IDisplayItem>
 {
     public static readonly DisplayItemCollection Empty = new();
 

@@ -5,7 +5,6 @@ namespace SupCom2ModPackager.DisplayItemClass;
 
 public class DisplayItemFile : DisplayItem
 {
-    public new static readonly DisplayItemFile Empty = new(DisplayItemCollection.Empty, new FileInfo(GeneralExtensions.GetValidDrives().First()));
     private readonly FileInfo info;
 
     public override string Name => info.Name;
@@ -37,7 +36,7 @@ public class DisplayItemFile : DisplayItem
     protected override string GetAction()
     {
         return string.Equals(".sc2", System.IO.Path.GetExtension(this.FullPath), StringComparison.OrdinalIgnoreCase)
-            ? "UnpackAsync"
+            ? "Unpack"
             : string.Empty;
     }
 }
