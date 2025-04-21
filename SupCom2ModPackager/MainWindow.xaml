@@ -61,7 +61,7 @@
                     <DataGridTemplateColumn Header="Modified" Width="160">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding LastModified}" IsHitTestVisible="False" />
+                                <TextBlock Text="{Binding Modified}" IsHitTestVisible="False" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -99,3 +99,4 @@
         </StackPanel>
     </Grid>
 </Window>
+    

@@ -1,4 +1,6 @@
-﻿using SupCom2ModPackager.Extensions;
+﻿using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Extensions;
+using SupCom2ModPackager.Utility;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +8,7 @@ using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace SupCom2ModPackager;
@@ -17,25 +20,21 @@ public partial class MainWindow : Window
 {
     private DisplayItemCollection _items;
     private readonly SC2ModPackager _modPackager;
-    private readonly ProgressReporter progressReporter;
 
     public MainWindow(
         DisplayItemCollection items,
-        SC2ModPackager modPackager,
-        ProgressReporter progressReporter)
+        SC2ModPackager modPackager)
     {
         _items = items;
         _modPackager = modPackager;
-        this.progressReporter = progressReporter;
         InitializeComponent();
 
-        progressReporter.SetVisibilityProperty(() => ExtractionProgress.Visibility);
-        progressReporter.SetMinimumProperty(() => ExtractionProgressBar.Minimum);
-        progressReporter.SetMaximumProperty(() => ExtractionProgressBar.Maximum);
-        progressReporter.SetValueProperty(() => ExtractionProgressBar.Value);
-        progressReporter.SetTextProperty(() => CurrentFileTextBlock.Text);
+        ExtractionProgress.Visibility = Visibility.Hidden;
+        ExtractionProgressBar.Value = -1;
+        ExtractionProgressBar.Minimum = 0;
+        ExtractionProgressBar.Maximum = 0;
+        CurrentFileTextBlock.Text = string.Empty;
 
-        //ExtractionProgress.Visibility = Visibility.Visible;
         PathDataGrid.ItemsSource = _items;
         PathDataGrid.CanUserSortColumns = true;
         PathLink.PathChanged += PathLink_PathChanged;
@@ -46,10 +45,9 @@ public partial class MainWindow : Window
         collectionView.Refresh();
 
 
-        var path = DriveInfo
-            .GetDrives()
-            .Where(d => d.IsReady && d.DriveType == DriveType.Fixed)
-            .Select(d => @$"{d.Name}SC2Mods\Testing")
+        var path = GeneralExtensions
+            .GetValidDrives()
+            .Select(name => @$"{name}SC2Mods\Testing")
             .First(Directory.Exists);
         PathLink.Path = path;
     }
@@ -57,54 +55,58 @@ public partial class MainWindow : Window
     private void PathLink_PathChanged(object? sender, string newPath)
     {
         _items.Clear();
-        _items.Add(DisplayItemType.Directory, newPath, "...");
+        _items.AddParent(new(newPath));
         foreach (var dir in Directory.GetDirectories(newPath))
         {
-            _items.Add(DisplayItemType.Directory, dir);
+            _items.Add(new DirectoryInfo(dir));
         }
         foreach (var file in Directory.GetFiles(newPath))
         {
-            _items.Add(DisplayItemType.File, file);
+            _items.Add(new FileInfo(file));
         }
     }
 
-    private async void ActionClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private async void ActionClicked(object sender, MouseButtonEventArgs e)
     {
-        DataGrid myGrid = (DataGrid)sender;
-        Point mousePos = e.GetPosition(myGrid);
-
-        var element = myGrid.InputHitTest(mousePos) as Visual;
-        var cell = element?.GetAncestorOfType<DataGridCell>();
-        if (cell == null)
-        {
+        if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             return;
-        }
 
-        var cellHeader = myGrid.Columns[cell.Column.DisplayIndex];
-        if (cellHeader.Header.ToString() != "Action")
+        if (item.Action == "UnpackAsync")
         {
-            return;
-        }
+            var fileItem = (DisplayItemFile)item;
 
-        var item = (DisplayItem)((DataGridRow)cell.BindingGroup.Owner).Item;
-        if (item.Action == "Unpack")
-        {
-            using (progressReporter.CreateReporter())
-            {
-                await _modPackager.Unpack(item);
-            }
-
-            ExtractionProgress.Visibility = Visibility.Visible;
             ExtractionProgressBar.Value = -1;
+            ExtractionProgressBar.Maximum = 0;
+            CurrentFileTextBlock.Text = string.Empty;
+
             // Show the progress overlay
+            ExtractionProgress.Visibility = Visibility.Visible;
             // Create a progress reporter
-            var progress = new Progress<string>(text =>
+            var progress = new Progress<PackProgressArgs>(args =>
             {
-                ++ExtractionProgressBar.Value;
-                CurrentFileTextBlock.Text = text;
+                if (args.Text != null)
+                    CurrentFileTextBlock.Text = args.Text;
+                if (args.Value != null)
+                    ExtractionProgressBar.Value = args.Value.Value;
+                else
+                    ++ExtractionProgressBar.Value;
+                if (args.Maximum != null)
+                    ExtractionProgressBar.Maximum = args.Maximum.Value;
             });
 
-            await _modPackager.Unpack(item, progress);
+
+            var overWrite = false;
+            if (Directory.Exists(fileItem.UnpackDirectoryPath))
+            {
+                //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync will overwrite existing directory", MessageBoxButton.OKCancel);
+                //if (result == MessageBoxResult.OK)
+                //{
+                overWrite = true;
+                //}
+
+            }
+
+            await _modPackager.UnpackAsync(fileItem, overWrite, progress);
 
 
             // Reset UI after completion

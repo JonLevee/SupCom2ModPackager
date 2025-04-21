@@ -1,4 +1,4 @@
-﻿namespace SupCom2ModPackager;
+﻿namespace SupCom2ModPackager.Utility;
 
 public class Disposable : IDisposable
 {

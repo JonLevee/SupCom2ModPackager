@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Utility;
 using System;
 using System.Windows;
 
@@ -14,6 +16,8 @@ namespace SupCom2ModPackager
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
+                    SupCom2ModPackagerConfiguration.ConfigureServices(services);
+
                     // Register services and view models
                     services.AddSingleton<MainWindow>();
                     services.AddSingleton<SC2ModPackager>();

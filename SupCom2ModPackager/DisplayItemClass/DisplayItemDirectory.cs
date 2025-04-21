@@ -1,0 +1,26 @@
+﻿using SupCom2ModPackager.Extensions;
+using System.IO;
+
+namespace SupCom2ModPackager.DisplayItemClass;
+
+public class DisplayItemDirectory : DisplayItem
+{
+    public new static readonly DisplayItemDirectory Empty = new(DisplayItemCollection.Empty, new DirectoryInfo(GeneralExtensions.GetValidDrives().First()));
+    private readonly DirectoryInfo info;
+
+    public override string Name => info.Name;
+    public override string FullPath => info.FullName;
+    public override DateTime Modified => info.LastWriteTime;
+    public override bool Exists => info.Exists;
+
+    public DisplayItemDirectory(DisplayItemCollection collection, DirectoryInfo info) : base(collection)
+    {
+        this.info = info;
+    }
+
+    protected override string GetAction()
+    {
+        return this.FullPath.IsSupCom2Directory() ? "Pack" : string.Empty;
+    }
+}
+

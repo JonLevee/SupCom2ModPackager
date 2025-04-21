@@ -1,80 +1,59 @@
 ﻿
+using SupCom2ModPackager.DisplayItemClass;
 using SupCom2ModPackager.Extensions;
+using SupCom2ModPackager.Utility;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
-using System.Windows.Shapes;
 
 namespace SupCom2ModPackager;
 
 public class SC2ModPackager
 {
     private readonly DisplayItemCollection _items;
-    private readonly ProgressReporter progressReporter;
 
-    public SC2ModPackager(DisplayItemCollection items, ProgressReporter progressReporter)
+    public SC2ModPackager(DisplayItemCollection items)
     {
         this._items = items;
-        this.progressReporter = progressReporter;
     }
 
-    public async Task Unpack(DisplayItem item)
+    public async Task UnpackAsync(DisplayItemFile itemFile, bool overWrite, IProgress<PackProgressArgs> progress)
     {
-        using (progressReporter.CreateReporter())
+        Contract.Requires(itemFile.FullPath.IsCompressedFile(), $"File {itemFile.Name} extension is not one of [{string.Join(',', GeneralExtensions.CompressedExtensions)}]");
+
+        var unpackDirectory = itemFile.UnpackDirectory;
+        if (unpackDirectory.Exists)
         {
-            progressReporter.Visibility = Visibility.Visible;
-            progressReporter.Minimum = progressReporter.Maximum = progressReporter.Value = 0;
-            progressReporter.Text = string.Empty;
-
-            var directory = Path.ChangeExtension(item.Path, null);
-            if (Directory.Exists(directory))
+            if (!overWrite)
+                throw new InvalidOperationException("Handle overWrite error");
+            progress.Report(new() { Value = 0, Text = $"Removing {unpackDirectory.Name} ..." });
+            await Task.Run(() =>
             {
-                //var result = MessageBox.Show("Overwrite directory?", "Unpack will overwrite existing directory", MessageBoxButton.OKCancel);
-                //if (result != MessageBoxResult.OK)
-                //{
-                //    return;
-                //}
-                progressReporter.Report("Removing folder ...");
-                await Task.Run(() => Directory.Delete(directory, true));
-
-            }
-
-            var targetDirectory = _items.FirstOrDefault(dirItem => string.Equals(directory, dirItem.Path, StringComparison.OrdinalIgnoreCase));
-            if (targetDirectory == null)
-            {
-                Directory.CreateDirectory(directory);
-                targetDirectory = _items.Add(DisplayItemType.Directory, directory);
-
-                await Task.CompletedTask;
-            }
-
-
-            progressReporter.Report("Scanning ...");
-            var count = await Task.Run(() => GetCountOfItemsToExtract(item.Path));
-            progressReporter.Maximum = count;
-
-
-            // Perform the extraction
-            if (!item.Path.IsCompressedFile())
-            {
-
-            }
-            await Task.Run(() => UnpackAsync(item.Path, progress));
-
-            progressReporter.Visibility = Visibility.Hidden;
+                Directory.Delete(unpackDirectory.FullPath, true);
+                _items.Remove(unpackDirectory);
+            });
         }
+
+        unpackDirectory = _items.Add(new DirectoryInfo(itemFile.UnpackDirectoryPath));
+        Directory.CreateDirectory(unpackDirectory.FullPath);
+
+        progress.Report(new() { Value = 0, Text = $"Scanning {itemFile.Name} ..." });
+        var count = await Task.Run(() => GetCountOfItemsToExtract(itemFile.FullPath));
+        progress.Report(new() { Value = 0, Maximum = count, Text = $"Extracting ..." });
+
+        // Perform the extraction
+        await Task.Run(() => UnpackAsyncInternal(itemFile.FullPath, progress));
     }
 
 
 
-    private static async Task UnpackAsync(string path, IProgress<string> progress)
+    private static async Task UnpackAsyncInternal(string path, IProgress<PackProgressArgs> progress)
     {
-        if (!path.IsCompressedFile())
-        {
-            return;
-        }
+        Contract.Requires(!string.IsNullOrEmpty(path), $"Invalid path [{path.GetNullOrEmpty()}]");
+        Contract.Requires(path.IsCompressedFile(), path.GetCompressedFileNameExtensionError());
 
         var directory = Path.ChangeExtension(path, null);
         Directory.CreateDirectory(directory);
@@ -98,10 +77,13 @@ public class SC2ModPackager
                 // Extract the file
                 entry.ExtractToFile(filePath, overwrite: true);
 
-                progress.Report($"Extracting {entry.FullName}");
+                progress.Report(new() { Text = $"Extracting {entry.FullName}" });
 
-                // Recursively unpack nested archives
-                await UnpackAsync(filePath, progress);
+                if (path.IsCompressedFile())
+                {
+                    // Recursively unpack nested archives
+                    await UnpackAsyncInternal(filePath, progress);
+                }
             }
         }
     }
