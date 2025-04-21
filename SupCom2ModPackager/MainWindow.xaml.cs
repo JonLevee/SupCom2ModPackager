@@ -21,12 +21,15 @@ public partial class MainWindow : Window
     private DisplayItemCollection _items;
     private readonly SC2ModPackager _modPackager;
 
+    public ICommand ActionCommand { get; }
+
     public MainWindow(
         DisplayItemCollection items,
         SC2ModPackager modPackager)
     {
         _items = items;
         _modPackager = modPackager;
+        ActionCommand = new RelayCommand(ExecuteActionCommand, CanExecuteActionCommand);
         InitializeComponent();
 
         ExtractionProgress.Visibility = Visibility.Hidden;
@@ -50,6 +53,18 @@ public partial class MainWindow : Window
             .Select(name => @$"{name}SC2Mods\Testing")
             .First(Directory.Exists);
         PathLink.Path = path;
+    }
+
+    private void ExecuteActionCommand(object? parameter)
+    {
+        // Handle the command logic here
+        //MessageBox.Show($"ActionCommand executed with parameter: {parameter}");
+    }
+
+    private bool CanExecuteActionCommand(object? parameter)
+    {
+        // Return true if the command can execute, otherwise false
+        return true;
     }
 
     private void PathLink_PathChanged(object? sender, string newPath)
@@ -119,5 +134,28 @@ public partial class MainWindow : Window
     private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
     {
 
+    }
+}
+
+
+public class RelayCommand : ICommand
+{
+    private readonly Action<object?> _execute;
+    private readonly Func<object?, bool>? _canExecute;
+
+    public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
+
+    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+
+    public void Execute(object? parameter) => _execute(parameter);
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add => CommandManager.RequerySuggested += value;
+        remove => CommandManager.RequerySuggested -= value;
     }
 }

@@ -88,7 +88,27 @@
                         </DataGridTemplateColumn.CellStyle>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
+                                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Button x:Name="ActionButton" 
+                                        Command="{Binding ActionCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        CommandParameter="{Binding}"
+                                        Content="test"
+                                        Background="Transparent" 
+                                        BorderBrush="Transparent" 
+                                        Foreground="Black" 
+                                        FontWeight="Normal" 
+                                        IsHitTestVisible="True" />
+                                    <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
+                                    <Button x:Name="ActionButton2" 
+                                        Command="{Binding Path=ActionCommand}" 
+                                        CommandParameter="{Binding Path=Action}" 
+                                        Background="Transparent" 
+                                        BorderBrush="Transparent" 
+                                        Foreground="Black" 
+                                        FontWeight="Normal" 
+                                        IsHitTestVisible="True" />
+                                    <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
+                                </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
