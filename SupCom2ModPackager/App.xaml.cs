@@ -10,6 +10,7 @@ namespace SupCom2ModPackager
     public partial class App : Application
     {
         private IHost _host;
+        public string Jon => string.Empty;
 
         public App()
         {
