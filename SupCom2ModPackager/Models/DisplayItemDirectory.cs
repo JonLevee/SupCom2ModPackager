@@ -1,7 +1,8 @@
-﻿using SupCom2ModPackager.Extensions;
+﻿using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Extensions;
 using System.IO;
 
-namespace SupCom2ModPackager.DisplayItemClass;
+namespace SupCom2ModPackager.Models;
 
 public class DisplayItemDirectory : DisplayItem
 {
@@ -20,7 +21,7 @@ public class DisplayItemDirectory : DisplayItem
 
     protected override string GetAction()
     {
-        return this.FullPath.IsSupCom2Directory() ? "Pack" : string.Empty;
+        return FullPath.IsSupCom2Directory() ? "Pack" : string.Empty;
     }
 }
 

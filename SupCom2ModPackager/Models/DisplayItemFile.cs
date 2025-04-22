@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using SupCom2ModPackager.DisplayItemClass;
 using SupCom2ModPackager.Extensions;
 
-namespace SupCom2ModPackager.DisplayItemClass;
+namespace SupCom2ModPackager.Models;
 
 public class DisplayItemFile : DisplayItem
 {
@@ -35,7 +36,7 @@ public class DisplayItemFile : DisplayItem
 
     protected override string GetAction()
     {
-        return string.Equals(".sc2", System.IO.Path.GetExtension(this.FullPath), StringComparison.OrdinalIgnoreCase)
+        return string.Equals(".sc2", Path.GetExtension(FullPath), StringComparison.OrdinalIgnoreCase)
             ? "Unpack"
             : string.Empty;
     }

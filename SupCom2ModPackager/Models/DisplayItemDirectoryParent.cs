@@ -1,7 +1,8 @@
-﻿using SupCom2ModPackager.Extensions;
+﻿using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Extensions;
 using System.IO;
 
-namespace SupCom2ModPackager.DisplayItemClass;
+namespace SupCom2ModPackager.Models;
 
 public class DisplayItemDirectoryParent : DisplayItemDirectory
 {

@@ -14,6 +14,7 @@ namespace SupCom2ModPackager
 
         public App()
         {
+
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
@@ -23,6 +24,7 @@ namespace SupCom2ModPackager
                     services.AddSingleton<MainWindow>();
                 })
                 .Build();
+            ServiceLocator.SetServiceProvider(_host.Services);
         }
 
         protected override void OnStartup(StartupEventArgs e)

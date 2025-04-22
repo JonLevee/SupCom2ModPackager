@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Models;
 
 namespace SupCom2ModPackager.Extensions
 {

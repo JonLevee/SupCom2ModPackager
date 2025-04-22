@@ -2,8 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using SupCom2ModPackager.DisplayItemClass;
 
-namespace SupCom2ModPackager.DisplayItemClass;
+namespace SupCom2ModPackager.Models;
 
 public interface IDisplayItem : INotifyPropertyChanged
 {

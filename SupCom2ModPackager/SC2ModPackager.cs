@@ -1,6 +1,7 @@
 ﻿
 using SupCom2ModPackager.DisplayItemClass;
 using SupCom2ModPackager.Extensions;
+using SupCom2ModPackager.Models;
 using SupCom2ModPackager.Utility;
 using System;
 using System.Diagnostics;
@@ -13,6 +14,7 @@ namespace SupCom2ModPackager;
 
 public class SC2ModPackager
 {
+    public static readonly SC2ModPackager Empty = new(DisplayItemCollection.Empty);
     private readonly DisplayItemCollection _items;
 
     public SC2ModPackager(DisplayItemCollection items)
