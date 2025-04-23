@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections;
+using System.Reflection;
 
 namespace SupCom2ModPackager.Extensions
 {
@@ -51,5 +52,20 @@ namespace SupCom2ModPackager.Extensions
                 .Select(d => d.Name)
                 .ToArray();
         }
+
+        public static FieldInfo? GetInheritedField(this Type? type, string fieldName, BindingFlags bindingFlags = BindingFlags.Default)
+        {
+            while (type != null)
+            {
+                var field = type.GetField(fieldName, bindingFlags);
+                if (field != null)
+                    return field;
+
+                type = type.BaseType;
+            }
+
+            return null;
+        }
+
     }
 }

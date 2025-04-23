@@ -21,23 +21,20 @@ public class SC2ModPackager
 
     public async Task UnpackAsync(DisplayItemFile itemFile, bool overWrite, IProgress<PackProgressArgs> progress)
     {
-        Contract.Requires(itemFile.FullPath.IsCompressedFile(), $"File {itemFile.Name} extension is not one of [{string.Join(',', GeneralExtensions.CompressedExtensions)}]");
+        Guard.Requires(itemFile.FullPath.IsCompressedFile(), $"File {itemFile.Name} extension is not one of [{string.Join(',', GeneralExtensions.CompressedExtensions)}]");
 
-        var unpackDirectory = itemFile.UnpackDirectory;
-        if (unpackDirectory.Exists)
+        if (Directory.Exists(itemFile.UnpackDirectoryPath))
         {
             if (!overWrite)
                 throw new InvalidOperationException("Handle overWrite error");
-            progress.Report(new() { Value = 0, Text = $"Removing {unpackDirectory.Name} ..." });
+            progress.Report(new() { Value = 0, Text = $"Removing {Path.GetFileName(itemFile.UnpackDirectoryPath)} ..." });
             await Task.Run(() =>
             {
-                Directory.Delete(unpackDirectory.FullPath, true);
-                _items.Remove(unpackDirectory);
+                Directory.Delete(itemFile.UnpackDirectoryPath, true);
             });
         }
 
-        unpackDirectory = _items.Add(new DirectoryInfo(itemFile.UnpackDirectoryPath));
-        Directory.CreateDirectory(unpackDirectory.FullPath);
+        Directory.CreateDirectory(itemFile.UnpackDirectoryPath);
 
         progress.Report(new() { Value = 0, Text = $"Scanning {itemFile.Name} ..." });
         var count = await Task.Run(() => GetCountOfItemsToExtract(itemFile.FullPath));
@@ -51,8 +48,8 @@ public class SC2ModPackager
 
     private static async Task UnpackAsyncInternal(string path, IProgress<PackProgressArgs> progress)
     {
-        Contract.Requires(!string.IsNullOrEmpty(path), $"Invalid path [{path.GetNullOrEmpty()}]");
-        Contract.Requires(path.IsCompressedFile(), path.GetCompressedFileNameExtensionError());
+        Guard.Requires(!string.IsNullOrEmpty(path), $"Invalid path [{path.GetNullOrEmpty()}]");
+        Guard.Requires(path.IsCompressedFile(), path.GetCompressedFileNameExtensionError());
 
         var directory = Path.ChangeExtension(path, null);
         Directory.CreateDirectory(directory);
@@ -78,7 +75,7 @@ public class SC2ModPackager
 
                 progress.Report(new() { Text = $"Extracting {entry.FullName}" });
 
-                if (path.IsCompressedFile())
+                if (filePath.IsCompressedFile())
                 {
                     // Recursively unpack nested archives
                     await UnpackAsyncInternal(filePath, progress);

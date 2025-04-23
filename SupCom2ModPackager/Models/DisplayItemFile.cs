@@ -23,7 +23,7 @@ public class DisplayItemFile : DisplayItem
                 .Where(item => item is DisplayItemDirectory)
                 .Cast<DisplayItemDirectory>()
                 .FirstOrDefault(dirItem => string.Equals(unpackDirectoryPath, dirItem.FullPath, StringComparison.OrdinalIgnoreCase));
-            return targetDirectory ?? DisplayItemDirectory.Empty;
+            return targetDirectory ?? DisplayItemDirectory.Bogus;
         }
     }
 

@@ -10,5 +10,6 @@ public static class SupCom2ModPackagerConfiguration
         services.AddSingleton<SC2ModPackager>();
         services.AddSingleton<DisplayItemCollection>();
         services.AddSingleton<SourceItemCollection>();
+        services.AddSingleton<DisplayItemCollectionMonitor>();
     }
 }

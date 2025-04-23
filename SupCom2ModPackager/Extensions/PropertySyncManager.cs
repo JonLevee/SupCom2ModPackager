@@ -20,7 +20,7 @@ namespace SupCom2ModPackager.Extensions
                 this.instance = instance;
                 var propertyChangedDelegate = instance
                     .GetType()
-                    .GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetInheritedField("PropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic)
                     !.GetValue(instance) as MulticastDelegate;
                 if (propertyChangedDelegate != null)
                 {
