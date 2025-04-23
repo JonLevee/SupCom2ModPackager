@@ -6,96 +6,24 @@
         xmlns:local="clr-namespace:SupCom2ModPackager"
         xmlns:controls="clr-namespace:SupCom2ModPackager.Controls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Supreme Commander 2 Mod Packager" Height="450" Width="800">
     <Grid Margin="10,10,10,10">
+        <TabControl>
+            <TabItem Header="Manager">
+                <controls:DisplayItemsControl/>
+            </TabItem>
+            <TabItem Header="Packager">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Downloader">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Sources">
+                <controls:SourcesViewControl x:Name="SourcesView" />
+            </TabItem>
+        </TabControl>
         <!-- Margin="102,0,76,400" -->
         <!-- Floating ExtractionProgress -->
-        <StackPanel 
-            x:Name="ExtractionProgress" 
-            Visibility="Hidden"
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Background="White" 
-            Opacity="1" 
-            Panel.ZIndex="200" 
-            Width="574" 
-            Height="45" 
-            Margin="0,100,0,0">
-            <ProgressBar x:Name="ExtractionProgressBar" Height="20" Minimum="0" Maximum="100" />
-            <TextBlock x:Name="CurrentFileTextBlock" Margin="0,5,0,0" Text="Ready" TextAlignment="Left" />
-        </StackPanel>
-        <StackPanel Margin="0,0,0,-385">
-            <controls:PathLinkControl x:Name="PathLink" />
-            <DataGrid x:Name="PathDataGrid" AutoGenerateColumns="False" Margin="0,0,0,0" Height="370" 
-                      MouseLeftButtonUp="ActionClicked" SelectionMode="Single" SelectionUnit="Cell"
-                      Sorting="PathDataGrid_Sorting"
-                      >
-                <DataGrid.CellStyle>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="Transparent" />
-                        <Setter Property="Foreground" Value="Black" />
-                        <Setter Property="FontWeight" Value="Normal" />
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="Black" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.CellStyle>
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <!-- Setter Property="IsHitTestVisible" Value="False" /-->
-                    </Style>
-                </DataGrid.RowStyle>
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Name" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" IsHitTestVisible="False" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Modified" Width="160">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding LastModified}" IsHitTestVisible="False" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Action" Width="80">
-                        <DataGridTemplateColumn.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="Black" />
-                                <Setter Property="FontWeight" Value="Normal" />
-                                <Style.Triggers>
-                                    <!-- Trigger for hover -->
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="FontWeight" Value="Bold" />
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="BorderBrush" Value="Transparent" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-
-                        </DataGridTemplateColumn.CellStyle>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                </DataGrid.Columns>
-            </DataGrid>
-
-        </StackPanel>
     </Grid>
 </Window>
+    

@@ -1,11 +1,13 @@
 ﻿using System.IO;
+using System.Collections;
 
 namespace SupCom2ModPackager.Extensions
 {
     public static class GeneralExtensions
     {
-        private static readonly string[] CompressedExtensions = [".zip", ".rar", ".sc2", ".scd"];
-        private static readonly string[] SupCom2Files = ["mod.zip", "meta.txt", "profile.yml"];
+        public static readonly string[] CompressedExtensions = [".zip", ".rar", ".sc2", ".scd"];
+        public static readonly string[] SupCom2Files = ["mod.zip", "meta.txt", "profile.yml"];
+        private static readonly IList EmptyList = new List<object>();
 
         public static bool IsCompressedFile(this string fileName)
         {
@@ -29,6 +31,25 @@ namespace SupCom2ModPackager.Extensions
                     return true;
             }
             return false;
+        }
+
+        public static IList GetListOrDefault(this IList? list)
+        {
+            return list ?? EmptyList;
+        }
+
+        public static string GetNullOrEmpty(this string? text)
+        {
+            return text == null ? "(null)" : text == string.Empty ? "(empty)" : text;
+        }
+
+        public static string[] GetValidDrives()
+        {
+            return DriveInfo
+                .GetDrives()
+                .Where(d => d.IsReady && d.DriveType == DriveType.Fixed)
+                .Select(d => d.Name)
+                .ToArray();
         }
     }
 }
