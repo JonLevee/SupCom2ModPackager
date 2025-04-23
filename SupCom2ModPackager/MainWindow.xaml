@@ -8,9 +8,22 @@
         mc:Ignorable="d"
         Title="Supreme Commander 2 Mod Packager" Height="450" Width="800">
     <Grid Margin="10,10,10,10">
+        <TabControl>
+            <TabItem Header="Manager">
+                <controls:DisplayItemsControl/>
+            </TabItem>
+            <TabItem Header="Packager">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Downloader">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Sources">
+                <controls:SourcesViewControl x:Name="SourcesView" />
+            </TabItem>
+        </TabControl>
         <!-- Margin="102,0,76,400" -->
         <!-- Floating ExtractionProgress -->
-        <controls:DisplayItemsControl x:Name="DisplayItemsControl" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" />
     </Grid>
 </Window>
     

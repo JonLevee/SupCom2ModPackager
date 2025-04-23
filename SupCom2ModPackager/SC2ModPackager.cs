@@ -1,14 +1,11 @@
 ﻿
-using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Collections;
 using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Models;
 using SupCom2ModPackager.Utility;
-using System;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
-using System.Windows;
 
 namespace SupCom2ModPackager;
 

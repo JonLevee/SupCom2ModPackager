@@ -1,6 +1,5 @@
 ﻿using System.IO;
-using SupCom2ModPackager.DisplayItemClass;
-using SupCom2ModPackager.Extensions;
+using SupCom2ModPackager.Collections;
 
 namespace SupCom2ModPackager.Models;
 

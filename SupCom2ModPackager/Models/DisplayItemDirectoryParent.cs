@@ -1,4 +1,4 @@
-﻿using SupCom2ModPackager.DisplayItemClass;
+﻿using SupCom2ModPackager.Collections;
 using SupCom2ModPackager.Extensions;
 using System.IO;
 

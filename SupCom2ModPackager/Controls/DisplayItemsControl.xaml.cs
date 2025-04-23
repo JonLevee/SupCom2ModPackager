@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Windows.Controls;
-using SupCom2ModPackager.DisplayItemClass;
+﻿using System.Windows.Controls;
 using SupCom2ModPackager.Utility;
 using System.Windows.Input;
 using SupCom2ModPackager.Extensions;
@@ -8,6 +6,7 @@ using SupCom2ModPackager.Models;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
+using SupCom2ModPackager.Collections;
 
 namespace SupCom2ModPackager.Controls
 {

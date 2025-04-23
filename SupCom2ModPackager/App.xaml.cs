@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SupCom2ModPackager.DisplayItemClass;
 using SupCom2ModPackager.Utility;
-using System;
 using System.Windows;
 
 namespace SupCom2ModPackager
@@ -30,6 +28,13 @@ namespace SupCom2ModPackager
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            //var items = ServiceLocator.GetService<SourceItemCollection>() ?? SourceItemCollection.Empty;
+            //foreach (var item in items)
+            //{
+            //    string text = GoogleDriveFolderLister.GetFolderContentsAsJson(item.SourcePath).Result;
+            //}
+
 
             // Resolve and show the MainWindow
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();

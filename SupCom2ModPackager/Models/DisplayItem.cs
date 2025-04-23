@@ -1,8 +1,7 @@
-﻿using System.Collections.Specialized;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Collections;
 
 namespace SupCom2ModPackager.Models;
 
@@ -46,8 +45,6 @@ public class DisplayItem : IDisplayItem
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         return true;
     }
-
-
 }
 
 

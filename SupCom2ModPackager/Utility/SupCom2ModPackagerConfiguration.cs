@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SupCom2ModPackager.DisplayItemClass;
+using SupCom2ModPackager.Collections;
 
 namespace SupCom2ModPackager.Utility;
 
@@ -9,5 +9,6 @@ public static class SupCom2ModPackagerConfiguration
     {
         services.AddSingleton<SC2ModPackager>();
         services.AddSingleton<DisplayItemCollection>();
+        services.AddSingleton<SourceItemCollection>();
     }
 }
