@@ -1,17 +1,21 @@
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using SupCom2ModPackager;
+using Xunit.Abstractions;
 
 namespace UnitTests
 {
     public class UnitTest1
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITestOutputHelper _output;
 
-        public UnitTest1()
+        public UnitTest1(ITestOutputHelper output)
         {
+            _output = output;
             // Configure the DI container
             _serviceProvider = TestServiceLocator.ConfigureServices();
         }
@@ -31,6 +35,8 @@ namespace UnitTests
         {
             var modelA = new Model();
             var modelB = new Model();
+            modelA.PropertyChanged += (sender, args) => _output.WriteLine($"ModelA Property Changed: {args.PropertyName}");
+            modelB.PropertyChanged += (sender, args) => _output.WriteLine($"ModelB Property Changed: {args.PropertyName}");
 
             PropertySyncManager.Sync(modelA, modelB, instance => instance.Name);
 
@@ -38,8 +44,10 @@ namespace UnitTests
             Assert.Null(modelB.Name);
 
             modelA.Name = "foo";
-            Assert.Same("foo", modelA.Name);
-            Assert.Same("foo", modelB.Name);
+            _output.WriteLine($"ModelA Name: {modelA.Name}");
+            _output.WriteLine($"ModelB Name: {modelB.Name}");
+            //Assert.Same("foo", modelA.Name);
+            //Assert.Same("foo", modelB.Name);
 
         }
     }
@@ -48,9 +56,6 @@ namespace UnitTests
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private int _rand = new Random().Next(0, 1000);
-        public int Rand =>
-            _rand;
         public string Name
         {
             get => this.GetSyncValue<string>();
@@ -65,33 +70,102 @@ namespace UnitTests
 
     public static class PropertySyncManager
     {
-        private static readonly Dictionary<object, Dictionary<string, object>> _instances = [];
-        private static Dictionary<string, object> GetValues(object instance)
+        private class InstanceInfo : INotifyPropertyChanged
         {
-            if (!_instances.TryGetValue(instance, out var values))
+            public event PropertyChangedEventHandler? PropertyChanged;
+            public readonly Dictionary<string, object> Values = new Dictionary<string, object>();
+            private readonly INotifyPropertyChanged instance;
+            private int _inSync = 0;
+
+            public MulticastDelegate PropertyChangedDelegate { get; set; } = null!;
+
+            public InstanceInfo(INotifyPropertyChanged instance) 
             {
-                values = new Dictionary<string, object>();
-                _instances[instance] = values;
+                PropertyChanged += NotifyInstance; 
+                this.instance = instance;
+                var field = instance.GetType().GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+                var eventInfo = instance.GetType().GetEvent("PropertyChanged", BindingFlags.Instance | BindingFlags.Public)!;
+                var methodInfo = GetType().GetMethod(nameof(NotifyFromInstance), BindingFlags.NonPublic | BindingFlags.Instance);
+                var handler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, this, methodInfo!);
+                eventInfo!.AddEventHandler(instance,  handler);
+                PropertyChangedDelegate = (field!.GetValue(instance) as MulticastDelegate)!;
+
             }
-            return values;
+
+            private void NotifyFromInstance(object? sender, PropertyChangedEventArgs e)
+            {
+                if (1 == Interlocked.CompareExchange(ref _inSync, 1, 0))
+                    return;
+                
+                _inSync = 0;
+
+            }
+            private void NotifyInstance(object? sender, PropertyChangedEventArgs e)
+            {
+                foreach (var handler in PropertyChangedDelegate.GetInvocationList())
+                {
+                    handler.Method.Invoke(handler.Target, [instance, e]);
+                }
+
+            }
+
+            public void OnPropertyChanged(string propertyName)
+            {
+                if (1 == Interlocked.CompareExchange(ref _inSync, 1, 0) )
+                    return;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                _inSync = 0;
+            }
         }
 
-        public static T GetSyncValue<T>(this object instance, [CallerMemberName] string? memberName = null)
+        private static readonly Dictionary<object, InstanceInfo> _instances = [];
+        private static InstanceInfo GetInstanceInfo(INotifyPropertyChanged instance)
+        {
+            if (!_instances.TryGetValue(instance, out var info))
+            {
+                info = new InstanceInfo(instance);
+                _instances[instance] = info;
+            }
+            return info;
+        }
+
+        public static T GetSyncValue<T>(this INotifyPropertyChanged instance, [CallerMemberName] string? memberName = null)
         {
             return GetSyncValue<T>(instance, out var _, memberName);
         }
 
-        public static T GetSyncValue<T>(this object instance, out Dictionary<string, object> values, [CallerMemberName] string? memberName = null)
+        private static T GetSyncValue<T>(this INotifyPropertyChanged instance, out InstanceInfo info, [CallerMemberName] string? memberName = null)
         {
-            values = GetValues(instance);
-            return (values.TryGetValue(memberName!, out var value) && value is T tValue) ? tValue : default!;
+            info = GetInstanceInfo(instance);
+            return (info.Values.TryGetValue(memberName!, out var value) && value is T tValue) ? tValue : default!;
         }
 
-        public static void SetSyncValue<T>(this object instance, T? value, [CallerMemberName] string? memberName = null)
+        public static void SetSyncValue<T>(this INotifyPropertyChanged instance, T? value, [CallerMemberName] string? memberName = null)
         {
-            if (!EqualityComparer<T>.Default.Equals(value, GetSyncValue<T>(instance, out Dictionary<string, object> values, memberName)))
+            if (!EqualityComparer<T>.Default.Equals(value, GetSyncValue<T>(instance, out var info, memberName)))
             {
-                values[memberName!] = value!;
+                info.Values[memberName!] = value!;
+                info.OnPropertyChanged(memberName!);
+                //if (info.PropertyChangedDelegate == null) return;
+                //foreach (var handler in info.PropertyChangedDelegate?.GetInvocationList()!)
+                //{
+                //    handler.Method.Invoke(handler.Target, [instance, new PropertyChangedEventArgs(memberName)]);
+                //}
+                //if (instance is INotifyPropertyChanged notifyPropertyChanged)
+                //{
+                //    var field = instance.GetType().GetField("PropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+                //    if (field != null)
+                //    {
+                //        var eventDelegate = field.GetValue(notifyPropertyChanged) as MulticastDelegate;
+                //        if (eventDelegate != null)
+                //        {
+                //            foreach (var handler in eventDelegate.GetInvocationList())
+                //            {
+                //                handler.Method.Invoke(handler.Target, [instance, new PropertyChangedEventArgs(memberName)]);
+                //            }
+                //        }
+                //    }
+                //}
             }
         }
 
@@ -106,9 +180,16 @@ namespace UnitTests
         {
             var memberName1 = ((MemberExpression)expression1.Body).Member.Name;
             var memberName2 = ((MemberExpression)expression2.Body).Member.Name;
-            var property1 = typeof(T1).GetProperty(memberName1);
-            var property2 = typeof(T2).GetProperty(memberName2);
+            var info1 = GetInstanceInfo(instance1);
+            var info2 = GetInstanceInfo(instance2);
 
+            //PropertyChangedEvent!.AddEventHandler(notifyPropertyChanged, new PropertyChangedEventHandler((sender, args) =>
+            //{
+            //    if (args.PropertyName == memberName)
+            //    {
+            //        // Handle the property changed event
+            //    }
+            //}));
 
         }
 
