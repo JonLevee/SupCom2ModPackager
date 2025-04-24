@@ -24,10 +24,17 @@
         </StackPanel>
         <StackPanel Margin="0,0,0,-385">
             <controls:PathLinkControl x:Name="PathLink" />
-            <DataGrid x:Name="PathDataGrid" AutoGenerateColumns="False" Margin="0,0,0,0" Height="370" 
-                      MouseLeftButtonUp="ActionClicked" SelectionMode="Single" SelectionUnit="Cell"
-                      Sorting="PathDataGrid_Sorting"
-                      >
+            <DataGrid 
+                x:Name="PathDataGrid" 
+                AutoGenerateColumns="False" 
+                Margin="0,0,0,0" 
+                Height="370" 
+                MouseLeftButtonUp="ActionClicked" 
+                SelectionMode="Single" 
+                SelectionUnit="Cell"
+                CanUserSortColumns="True"
+                Sorting="PathDataGrid_Sorting"
+                >
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="Background" Value="Transparent" />
@@ -49,21 +56,21 @@
                     </Style>
                 </DataGrid.RowStyle>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Name" Width="*">
+                    <DataGridTemplateColumn Header="Name" SortMemberPath="Name" Width="*" SortDirection="Ascending" CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" IsHitTestVisible="False" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Modified" Width="160">
+                    <DataGridTemplateColumn Header="Modified" SortMemberPath="Modified" Width="160"  CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Modified}" IsHitTestVisible="False" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Action" Width="80">
+                    <DataGridTemplateColumn Header="Action" SortMemberPath="Action" Width="80" CanUserSort="True">
                         <DataGridTemplateColumn.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Setter Property="Background" Value="Transparent" />

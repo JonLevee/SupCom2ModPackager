@@ -12,7 +12,7 @@ namespace SupCom2ModPackager.Models
         LocalFolder,
     }
 
-    internal class SourceItem
+    public class SourceItem
     {
         public SourceType SourceType { get; set; } = SourceType.GoogleDrive;
         public string FriendlyName { get; set; } = string.Empty;

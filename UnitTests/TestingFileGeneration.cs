@@ -8,11 +8,9 @@ namespace UnitTests
 {
     public class TestingFileGeneration
     {
-        private readonly IServiceProvider _serviceProvider;
-
         public TestingFileGeneration()
         {
-            _serviceProvider = TestServiceLocator.ConfigureServices();
+            ServiceLocator.ConfigureServices(TestServiceConfigurator.ConfigureServices);
         }
         [Fact]
         public async Task GenerateStubs()
@@ -29,16 +27,14 @@ namespace UnitTests
             //if (Directory.Exists(TestPathStubs))
             //    Directory.Delete(TestPathStubs, true);
             Directory.CreateDirectory(testPathStubs);
-            var items = TestServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
-            var packager = TestServiceLocator.GetService<SC2ModPackager>() ?? throw new InvalidOperationException("");
+            var items = ServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
+            var packager = ServiceLocator.GetService<SC2ModPackager>() ?? throw new InvalidOperationException("");
             var progress = new Progress<PackProgressArgs>(args =>
             {
             });
-            var collection = TestServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
-            var monitor = TestServiceLocator.GetService<DisplayItemCollectionMonitor>() ?? throw new InvalidOperationException("");
-            PropertySyncManager.Sync(collection, monitor, instance => instance.Path, instance => instance.Path);
+            var collection = ServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
             collection.Path = testPathFull;
-            
+
 
             foreach (var item in collection.Files.ToList())
             {

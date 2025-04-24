@@ -19,7 +19,7 @@
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
             <TabItem Header="Sources">
-                <controls:SourcesViewControl x:Name="SourcesView" />
+                <controls:SourcesViewControl />
             </TabItem>
         </TabControl>
         <!-- Margin="102,0,76,400" -->

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
 using SupCom2ModPackager.Collections;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace SupCom2ModPackager.Controls
 {
@@ -15,18 +16,33 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class DisplayItemsControl : UserControl
     {
-        private readonly DisplayItemCollection _items;
-        private readonly SC2ModPackager _modPackager;
+        private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
+        private readonly SC2ModPackager _modPackager = ServiceLocator.GetRequiredService<SC2ModPackager>();
+        private readonly SupCom2ModPackagerSettings settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
+        private readonly FileSystemWatcher _fileSystemWatcher;
         public ICommand ActionCommand { get; }
 
 
         public DisplayItemsControl()
         {
-            _items = ServiceLocator.GetService<DisplayItemCollection>() ?? DisplayItemCollection.Empty;
-            _modPackager = ServiceLocator.GetService<SC2ModPackager>() ?? SC2ModPackager.Empty;
             ActionCommand = new RelayCommand(ExecuteActionCommand, CanExecuteActionCommand);
 
             InitializeComponent();
+
+            _fileSystemWatcher = new FileSystemWatcher
+            {
+                IncludeSubdirectories = false,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                Filter = "*",
+                EnableRaisingEvents = false
+            };
+            _fileSystemWatcher.Created += OnCreated;
+            _fileSystemWatcher.Deleted += OnDeleted;
+            _fileSystemWatcher.EnableRaisingEvents = false;
+
+            PropertySyncManager.Sync(_items, PathLink, x => x.Path, x => x.Path);
+            PropertySyncManager.Sync(_items, settings, x => x.Path, x => x.ModPath);
+
             ExtractionProgress.Visibility = System.Windows.Visibility.Hidden;
             ExtractionProgressBar.Value = -1;
             ExtractionProgressBar.Minimum = 0;
@@ -34,21 +50,22 @@ namespace SupCom2ModPackager.Controls
             CurrentFileTextBlock.Text = string.Empty;
 
             PathDataGrid.ItemsSource = _items;
-            PathDataGrid.CanUserSortColumns = true;
-            PathLink.PathChanged += PathLink_PathChanged;
             // Automatically sort the DataGrid by Name
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
             collectionView.SortDescriptions.Clear();
             collectionView.SortDescriptions.Add(new SortDescription(nameof(DisplayItem.Name), ListSortDirection.Ascending));
             collectionView.Refresh();
+            PathDataGrid.Sorting += PathDataGrid_Sorting;
+        }
 
+        private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            e.Handled = true; // Prevent default sorting behavior
 
-            var path = GeneralExtensions
-                .GetValidDrives()
-                .Select(name => @$"{name}SC2Mods\Testing")
-                .First(Directory.Exists);
-            PathLink.Path = path;
-
+            var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
+            collectionView.SortDescriptions.Clear();
+            collectionView.SortDescriptions.Add(new SortDescription(e.Column.SortMemberPath, ListSortDirection.Ascending));
+            collectionView.Refresh();
         }
 
         private void ExecuteActionCommand(object? parameter)
@@ -125,12 +142,27 @@ namespace SupCom2ModPackager.Controls
             }
         }
 
-
-
-        private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        private void OnDeleted(object sender, FileSystemEventArgs e)
         {
-
+            _items.TryRemove(e.FullPath, out _);
         }
+
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            if (File.Exists(e.FullPath))
+            {
+                _items.Add(new FileInfo(e.FullPath));
+                return;
+            }
+            if (Directory.Exists(e.FullPath))
+            {
+                _items.Add(new DirectoryInfo(e.FullPath));
+                return;
+            }
+            throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
+        }
+
+
 
     }
 }

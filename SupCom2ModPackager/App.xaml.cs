@@ -1,28 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Utility;
+using System.IO;
 using System.Windows;
 
 namespace SupCom2ModPackager
 {
     public partial class App : Application
     {
-        private IHost _host;
-        public string Jon => string.Empty;
 
         public App()
         {
-
-            _host = Host.CreateDefaultBuilder()
-                .ConfigureServices((context, services) =>
-                {
-                    SupCom2ModPackagerConfiguration.ConfigureServices(services);
-
-                    // Register services and view models
-                    services.AddSingleton<MainWindow>();
-                })
-                .Build();
-            ServiceLocator.SetServiceProvider(_host.Services);
+            ServiceLocator.ConfigureServices(services =>
+            {
+            });
         }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -37,13 +29,20 @@ namespace SupCom2ModPackager
 
 
             // Resolve and show the MainWindow
-            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            var mainWindow = ServiceLocator.GetRequiredService<MainWindow>();
+            var settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
+            var path = GeneralExtensions
+                .GetValidDrives()
+                .Select(name => @$"{name}SC2Mods\Testing\Partial")
+                .First(Directory.Exists);
+            settings.ModPath = path;
+
             mainWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            _host.Dispose();
+            ServiceLocator.Shutdown();
             base.OnExit(e);
         }
     }

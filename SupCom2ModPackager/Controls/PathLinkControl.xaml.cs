@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SupCom2ModPackager.Extensions;
 
 namespace SupCom2ModPackager.Controls
 {
@@ -23,14 +24,13 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class PathLinkControl : UserControl
     {
-        private string _path;
         public string Path
         {
-            get { return _path; }
+            get => this.GetSyncValue<string>();
             set
             {
-                _path = value;
-                SetPath(_path);
+                if (this.SetSyncValue(value))
+                    SetPath(value);
             }
         }
 
@@ -39,20 +39,16 @@ namespace SupCom2ModPackager.Controls
             return (string)((Button)PathPanel.Children[PathPanel.Children.Count - 1]).Tag;
         }
 
-        public event EventHandler<string>? PathChanged;
-
         public PathLinkControl()
         {
             InitializeComponent();
             PathPanel.Children.Clear();
-            _path = string.Empty;
         }
 
 
         private void SetPath(string newPath)
         {
             var sb = new StringBuilder();
-            var changed = false;
             var pathParts = newPath.Split(System.IO.Path.DirectorySeparatorChar);
             for (int i = 0; i < pathParts.Length; i++)
             {
@@ -67,7 +63,6 @@ namespace SupCom2ModPackager.Controls
                     };
                     button.Click += PathButtonClicked;
                     PathPanel.Children.Add(button);
-                    changed = true;
                 }
                 else
                 {
@@ -77,7 +72,6 @@ namespace SupCom2ModPackager.Controls
                     {
                         button.Content = pathPart;
                         button.Tag = sb.ToString();
-                        changed = true;
                     }
                 }
             }
@@ -87,20 +81,12 @@ namespace SupCom2ModPackager.Controls
                 var button = (Button)PathPanel.Children[PathPanel.Children.Count - 1];
                 button.Click -= PathButtonClicked;
                 PathPanel.Children.RemoveAt(PathPanel.Children.Count - 1);
-                changed = true;
-            }
-
-            if (changed)
-            {
-                PathChanged?.Invoke(this, newPath);
             }
         }
 
         private void PathButtonClicked(object sender, RoutedEventArgs e)
         {
-            var newPath = (string)((Button)sender).Tag;
-            SetPath(newPath);
+            this.Path = (string)((Button)sender).Tag;
         }
-
     }
 }

@@ -18,8 +18,8 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDispos
         get => this.GetSyncValue<string>();
         set
         {
-            this.SetSyncValue(value);
-            Load();
+            if (this.SetSyncValue(value))
+                Load();
         }
     }
 
@@ -69,6 +69,7 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDispos
     {
         if (string.IsNullOrEmpty(Path) || !Directory.Exists(Path))
             return;
+        Clear();
         var directoryInfo = new DirectoryInfo(Path);
         AddParent(directoryInfo);
         foreach (var file in directoryInfo.GetFiles())
@@ -86,69 +87,5 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDispos
         PropertySyncManager.Remove(this);
     }
 
-}
-
-public class DisplayItemCollectionMonitor : INotifyPropertyChanged, IDisposable
-{
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private readonly FileSystemWatcher watcher;
-    private readonly DisplayItemCollection collection;
-
-    public string Path
-    {
-        get => this.GetSyncValue<string>();
-        set
-        {
-            this.SetSyncValue(value);
-            watcher.Path = value;
-            watcher.EnableRaisingEvents = !string.IsNullOrEmpty(value) && Directory.Exists(value);
-        }
-    }
-
-    public DisplayItemCollectionMonitor(DisplayItemCollection collection)
-    {
-        watcher = new FileSystemWatcher
-        {
-            IncludeSubdirectories = false,
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
-            Filter = "*"
-        };
-        watcher.Created += OnCreated;
-        watcher.Deleted += OnDeleted;
-        watcher.EnableRaisingEvents = false;
-        this.collection = collection;
-    }
-
-    private void OnDeleted(object sender, FileSystemEventArgs e)
-    {
-        collection.TryRemove(e.FullPath, out _);
-    }
-
-    private void OnCreated(object sender, FileSystemEventArgs e)
-    {
-        if (File.Exists(e.FullPath))
-        {
-            collection.Add(new FileInfo(e.FullPath));
-            return;
-        }
-        if (Directory.Exists(e.FullPath))
-        {
-            collection.Add(new DirectoryInfo(e.FullPath));
-            return;
-        }
-        throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
-    }
-
-
-    public void Dispose()
-    {
-        PropertySyncManager.Remove(this);
-
-        watcher.EnableRaisingEvents = false;
-        watcher.Created -= OnCreated;
-        watcher.Deleted -= OnDeleted;
-        watcher.Dispose();
-    }
 }
 

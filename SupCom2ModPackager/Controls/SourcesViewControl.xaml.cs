@@ -22,10 +22,9 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class SourcesViewControl : UserControl
     {
-        private SourceItemCollection Items;
+        private SourceItemCollection Items = ServiceLocator.GetRequiredService<SourceItemCollection>();
         public SourcesViewControl()
         {
-            Items = ServiceLocator.GetService<SourceItemCollection>() ?? SourceItemCollection.Empty;
             foreach (var item in Items)
             {
                 //string text = GoogleDriveFolderLister.GetFolderContentsAsJson(item.SourcePath).Result;

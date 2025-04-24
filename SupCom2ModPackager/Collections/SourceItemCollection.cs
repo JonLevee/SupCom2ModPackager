@@ -4,7 +4,7 @@ using static System.Net.WebRequestMethods;
 
 namespace SupCom2ModPackager.Collections
 {
-    internal class SourceItemCollection : ObservableCollection<SourceItem>
+    public class SourceItemCollection : ObservableCollection<SourceItem>
     {
         public static readonly SourceItemCollection Empty = new SourceItemCollection();
         public SourceItemCollection()

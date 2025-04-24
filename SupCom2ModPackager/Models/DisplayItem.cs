@@ -8,6 +8,7 @@ namespace SupCom2ModPackager.Models;
 public interface IDisplayItem : INotifyPropertyChanged
 {
     string Name { get; }
+    string SortName { get; }
     string FullPath { get; }
     DateTime Modified { get; }
     string Action { get; }
@@ -23,6 +24,7 @@ public class DisplayItem : IDisplayItem
     protected readonly DisplayItemCollection collection = DisplayItemCollection.Empty;
 
     public virtual string Name => throw new NotImplementedException();
+    public virtual string SortName => Name;
     public virtual string FullPath => throw new NotImplementedException();
     public virtual DateTime Modified => throw new NotImplementedException();
     public string Action => GetAction();
