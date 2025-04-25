@@ -22,97 +22,58 @@
             <ProgressBar x:Name="ExtractionProgressBar" Height="20" Minimum="0" Maximum="100" />
             <TextBlock x:Name="CurrentFileTextBlock" Margin="0,5,0,0" Text="Ready" TextAlignment="Left" />
         </StackPanel>
-        <StackPanel Margin="0,0,0,-385">
-            <controls:PathLinkControl x:Name="PathLink" />
-            <DataGrid 
-                x:Name="PathDataGrid" 
-                AutoGenerateColumns="False" 
-                Margin="0,0,0,0" 
-                Height="370" 
-                MouseLeftButtonUp="ActionClicked" 
-                SelectionMode="Single" 
-                SelectionUnit="Cell"
-                CanUserSortColumns="True"
-                Sorting="PathDataGrid_Sorting"
-                >
-                <DataGrid.CellStyle>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="Transparent" />
-                        <Setter Property="Foreground" Value="Black" />
-                        <Setter Property="FontWeight" Value="Normal" />
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="Black" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.CellStyle>
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <!-- Setter Property="IsHitTestVisible" Value="False" /-->
-                    </Style>
-                </DataGrid.RowStyle>
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" IsHitTestVisible="False" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending"  CanUserSort="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Modified}" IsHitTestVisible="False" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Action" SortMemberPath="ActionSort" Width="80" SortDirection="Ascending"  CanUserSort="True">
-                        <DataGridTemplateColumn.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="Black" />
-                                <Setter Property="FontWeight" Value="Normal" />
-                                <Style.Triggers>
-                                    <!-- Trigger for hover -->
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="FontWeight" Value="Bold" />
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="BorderBrush" Value="Transparent" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+        <StackPanel Margin="0,0,0,0">
+            <controls:PathLinkControl x:Name="PathLink" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <DataGrid 
+                    x:Name="PathDataGrid" 
+                    AutoGenerateColumns="False" 
+                    Margin="0,0,0,0" 
+                    Height="370" 
+                    Width="512"
+                    HorizontalAlignment="Left"
+                    MouseLeftButtonUp="ActionClicked" 
+                    SelectionMode="Single" 
+                    SelectionUnit="FullRow"
+                    CanUserSortColumns="True"
+                    Sorting="PathDataGrid_Sorting"
+                    >
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <!-- Setter Property="IsHitTestVisible" Value="False" /-->
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending"  CanUserSort="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>  
+                                   <TextBlock Text="{Binding Modified, StringFormat='{}{0:MM/dd/yyyy h:mm tt}'}" />  
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Width="287" Height="auto" Orientation="Vertical">
+                    <StackPanel Width="auto" Height="auto" Orientation="Horizontal">
+                        <Border BorderBrush="Black" BorderThickness="1" Padding="5">
+                            <TextBlock Text="Command" FontWeight="DemiBold"/>
+                        </Border>
+                        <Button x:Name="CommandUnpack" Content="Unpack" Width="Auto" Height="Auto" Margin="5,0,0,0" Click="CommandUnpack_Click"/>
+                        <Button x:Name="CommandPack" Content="Pack" Width="Auto" Height="Auto" Margin="5,0,0,0" Click="CommandPack_Click"/>
+                    </StackPanel>
+                    <Border BorderBrush="Black" BorderThickness="1" Padding="5">
+                       <TextBlock Text="profile.yml"/>
+                   </Border>
+                </StackPanel>
 
-                        </DataGridTemplateColumn.CellStyle>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Button x:Name="ActionButton" 
-                                        Command="{Binding ActionCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                        CommandParameter="{Binding}"
-                                        Visibility="{Binding ActionVisibility}"
-                                        Content="test"
-                                        Background="Transparent" 
-                                        BorderBrush="Transparent" 
-                                        Foreground="Black" 
-                                        FontWeight="Normal" 
-                                        IsHitTestVisible="True" />
-                                    <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                </DataGrid.Columns>
-            </DataGrid>
-
+            </StackPanel>
         </StackPanel>
 
     </Grid>

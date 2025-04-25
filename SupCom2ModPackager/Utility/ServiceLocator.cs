@@ -71,8 +71,8 @@ namespace SupCom2ModPackager.Utility
         {
             if (IsInDesignMode && serviceLocator._services == null)
             {
-                throw new InvalidOperationException("boo");
-                //ConfigureServicesInternal(null);
+                //throw new InvalidOperationException("boo");
+                ConfigureServicesInternal(null);
             }
         }
 

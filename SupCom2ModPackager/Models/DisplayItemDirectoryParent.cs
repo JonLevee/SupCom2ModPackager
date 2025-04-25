@@ -6,26 +6,24 @@ using System.IO;
 
 namespace SupCom2ModPackager.Models;
 
-public class DisplayItemDirectoryParent : DisplayItemDirectory
+public class DisplayItemDirectoryParent : DisplayItem
 {
-    public new static readonly DisplayItemDirectoryParent Empty = new(DisplayItemCollection.Empty, new DirectoryInfo(GeneralExtensions.GetValidDrives().First()));
+    public static new readonly DisplayItemDirectoryParent Empty = new(DisplayItemCollection.Empty, null!);
     private readonly DirectoryInfo info;
 
     public override string Name => "...";
     public override string NameSort => SortDirection == ListSortDirection.Ascending ? " " : "zzz";
+    public override string FullPath => info.FullName;
+    public override DateTime Modified => info.LastWriteTime;
     public override DateTime ModifiedSort => SortDirection == ListSortDirection.Ascending ? DateTime.MinValue : DateTime.MaxValue;
-    public override string ActionSort => SortDirection == ListSortDirection.Ascending ? " " : "zzz";
+    public override bool Exists => info.Exists;
+
 
     public ListSortDirection SortDirection { get; set; } = ListSortDirection.Ascending;
 
-    public DisplayItemDirectoryParent(DisplayItemCollection collection, DirectoryInfo info) : base(collection, info)
+    public DisplayItemDirectoryParent(DisplayItemCollection collection, DirectoryInfo info) : base(collection)
     {
         this.info = info;
-    }
-
-    protected override string GetAction()
-    {
-        return string.Empty;
     }
 }
 

@@ -4,19 +4,40 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SupCom2ModPackager.Controls"
-             mc:Ignorable="d" >
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="150">
     <UserControl.Resources>
         <Style TargetType="Button">
-            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Margin" Value="2,0,2,0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="Auto"/>
             <Setter Property="Height" Value="Auto"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </UserControl.Resources>
-    <StackPanel x:Name="PathPanel" Orientation="Horizontal" >
-        <Button Content="C:" />
-        <Button Content="\path1" />
-        <Button Content="\path2" />
-    </StackPanel>
+    <Grid HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock 
+                Text="Path" 
+                VerticalAlignment="Center" 
+                Margin="5,0,5,0" 
+                FontWeight="DemiBold"
+                />
+            <StackPanel x:Name="PathPanel" Orientation="Horizontal" >
+                <Button Content="C:" />
+                <TextBlock Text=">" />
+                <Button Content="path1" />
+                <TextBlock Text=">" />
+                <Button Content="path2" />
+            </StackPanel>
+        </StackPanel>
+        
+    </Grid>
 </UserControl>

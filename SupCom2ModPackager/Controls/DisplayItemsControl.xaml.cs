@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
 using SupCom2ModPackager.Collections;
+using Vis = System.Windows.Visibility;
 using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace SupCom2ModPackager.Controls
@@ -43,7 +44,7 @@ namespace SupCom2ModPackager.Controls
             PropertySyncManager.Sync(_items, PathLink, x => x.Path, x => x.Path);
             PropertySyncManager.Sync(_items, settings, x => x.Path, x => x.ModPath);
 
-            ExtractionProgress.Visibility = System.Windows.Visibility.Hidden;
+            ExtractionProgress.Visibility = Vis.Hidden;
             ExtractionProgressBar.Value = -1;
             ExtractionProgressBar.Minimum = 0;
             ExtractionProgressBar.Maximum = 0;
@@ -54,6 +55,24 @@ namespace SupCom2ModPackager.Controls
             collectionView.SortDescriptions.Clear();
             collectionView.SortDescriptions.Add(new SortDescription(nameof(IDisplayItem.NameSort), ListSortDirection.Ascending));
             collectionView.Refresh();
+
+            PathDataGrid.SelectionChanged += PathDataGrid_SelectionChanged;
+            CommandUnpack.Visibility = Vis.Collapsed;
+            CommandPack.Visibility = Vis.Collapsed;
+        }
+
+        private void PathDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CommandUnpack.Visibility = Vis.Collapsed;
+            CommandPack.Visibility = Vis.Collapsed;
+            if (PathDataGrid.SelectedItem is DisplayItemFile fileItem)
+            {
+                CommandUnpack.Visibility = fileItem.FullPath.IsCompressedFile() ? Vis.Visible : Vis.Collapsed;
+            }
+            else if (PathDataGrid.SelectedItem is DisplayItemDirectoryParent directoryItem)
+            {
+                CommandPack.Visibility = directoryItem.FullPath.IsSupCom2Directory() ? Vis.Visible : Vis.Collapsed;
+            }
         }
 
         private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
@@ -91,50 +110,51 @@ namespace SupCom2ModPackager.Controls
 
         private async void ActionClicked(object sender, MouseButtonEventArgs e)
         {
-            if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
-                return;
+            bogus
+            //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
+            //    return;
 
-            if (item.Action == "UnpackAsync")
-            {
-                var fileItem = (DisplayItemFile)item;
+            //if (item.Action == "UnpackAsync")
+            //{
+            //    var fileItem = (DisplayItemFile)item;
 
-                ExtractionProgressBar.Value = -1;
-                ExtractionProgressBar.Maximum = 0;
-                CurrentFileTextBlock.Text = string.Empty;
+            //    ExtractionProgressBar.Value = -1;
+            //    ExtractionProgressBar.Maximum = 0;
+            //    CurrentFileTextBlock.Text = string.Empty;
 
-                // Show the progress overlay
-                ExtractionProgress.Visibility = System.Windows.Visibility.Visible;
-                // Create a progress reporter
-                var progress = new Progress<PackProgressArgs>(args =>
-                {
-                    if (args.Text != null)
-                        CurrentFileTextBlock.Text = args.Text;
-                    if (args.Value != null)
-                        ExtractionProgressBar.Value = args.Value.Value;
-                    else
-                        ++ExtractionProgressBar.Value;
-                    if (args.Maximum != null)
-                        ExtractionProgressBar.Maximum = args.Maximum.Value;
-                });
-
-
-                var overWrite = false;
-                if (Directory.Exists(fileItem.UnpackDirectoryPath))
-                {
-                    //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync will overwrite existing directory", MessageBoxButton.OKCancel);
-                    //if (result == MessageBoxResult.OK)
-                    //{
-                    overWrite = true;
-                    //}
-
-                }
-
-                await _modPackager.UnpackAsync(fileItem, overWrite, progress);
+            //    // Show the progress overlay
+            //    ExtractionProgress.Visibility = Vis.Visible;
+            //    // Create a progress reporter
+            //    var progress = new Progress<PackProgressArgs>(args =>
+            //    {
+            //        if (args.Text != null)
+            //            CurrentFileTextBlock.Text = args.Text;
+            //        if (args.Value != null)
+            //            ExtractionProgressBar.Value = args.Value.Value;
+            //        else
+            //            ++ExtractionProgressBar.Value;
+            //        if (args.Maximum != null)
+            //            ExtractionProgressBar.Maximum = args.Maximum.Value;
+            //    });
 
 
-                // Reset UI after completion
-                ExtractionProgress.Visibility = System.Windows.Visibility.Hidden;
-            }
+            //    var overWrite = false;
+            //    if (Directory.Exists(fileItem.UnpackDirectoryPath))
+            //    {
+            //        //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync will overwrite existing directory", MessageBoxButton.OKCancel);
+            //        //if (result == MessageBoxResult.OK)
+            //        //{
+            //        overWrite = true;
+            //        //}
+
+            //    }
+
+            //    await _modPackager.UnpackAsync(fileItem, overWrite, progress);
+
+
+            //    // Reset UI after completion
+            //    ExtractionProgress.Visibility = Vis.Hidden;
+            //}
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -157,7 +177,14 @@ namespace SupCom2ModPackager.Controls
             throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
         }
 
+        private void CommandUnpack_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
 
+        }
 
+        private void CommandPack_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

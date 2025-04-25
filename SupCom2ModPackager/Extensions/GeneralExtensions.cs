@@ -16,6 +16,11 @@ namespace SupCom2ModPackager.Extensions
             return extension != null && CompressedExtensions.Contains(extension);
         }
 
+        public static bool IsSupCom2Directory(this string directory)
+        {
+            return true;
+        }
+
         public static string? GetCompressedFileName(this string directory)
         {
             var compressedFile = CompressedExtensions
@@ -24,7 +29,7 @@ namespace SupCom2ModPackager.Extensions
             return compressedFile;
         }
 
-        public static bool IsSupCom2Directory(this string directory)
+        public static bool HasSupCom2CompressedFile(this string directory)
         {
             if (CompressedExtensions.Select(ext => directory + ext).Any(File.Exists))
             {

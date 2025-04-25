@@ -19,10 +19,5 @@ public class DisplayItemDirectory : DisplayItem
     {
         this.info = info;
     }
-
-    protected override string GetAction()
-    {
-        return FullPath.IsSupCom2Directory() ? "Pack" : string.Empty;
-    }
 }
 

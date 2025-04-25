@@ -13,9 +13,6 @@ public interface IDisplayItem : INotifyPropertyChanged
     string FullPath { get; }
     DateTime Modified { get; }
     DateTime ModifiedSort { get; }
-    string Action { get; }
-    string ActionSort { get; }
-    Visibility ActionVisibility { get; }
     bool Exists { get; }
 }
 
@@ -32,9 +29,6 @@ public class DisplayItem : IDisplayItem
     public virtual string FullPath => throw new NotImplementedException();
     public virtual DateTime Modified => throw new NotImplementedException();
     public virtual DateTime ModifiedSort => Modified;
-    public string Action => GetAction();
-    public virtual string ActionSort => Action;
-    public virtual Visibility ActionVisibility => string.IsNullOrEmpty(Action) ? Visibility.Collapsed : Visibility.Visible;
     public virtual bool Exists => false;
 
     private DisplayItem() { }
@@ -43,8 +37,6 @@ public class DisplayItem : IDisplayItem
     {
         this.collection = collection;
     }
-
-    protected virtual string GetAction() => throw new NotImplementedException();
 
     protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

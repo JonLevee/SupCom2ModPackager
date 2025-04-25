@@ -32,13 +32,6 @@ public class DisplayItemFile : DisplayItem
     {
         this.info = info;
     }
-
-    protected override string GetAction()
-    {
-        return string.Equals(".sc2", Path.GetExtension(FullPath), StringComparison.OrdinalIgnoreCase)
-            ? "Unpack"
-            : string.Empty;
-    }
 }
 
 
