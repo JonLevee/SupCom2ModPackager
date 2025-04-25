@@ -1,4 +1,6 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata;
 
 namespace SupCom2ModPackager.Extensions
 {
@@ -9,11 +11,19 @@ namespace SupCom2ModPackager.Extensions
             return $"File {path} extension is not one of [{string.Join(',', GeneralExtensions.CompressedExtensions)}]";
         }
 
-        public static void Requires(bool condition)
+        [Conditional("CONTRACTS_FULL")]
+        public static void Requires(
+            [DoesNotReturnIf(false)]
+            bool condition)
         {
             Requires(condition, "Condition is not met.");
         }
-        public static void Requires(bool condition, string message)
+
+        [Conditional("CONTRACTS_FULL")]
+        public static void Requires(
+            [DoesNotReturnIf(false)]
+            bool condition,
+            string message)
         {
             if (!condition)
             {

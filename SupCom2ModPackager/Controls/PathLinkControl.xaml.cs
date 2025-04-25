@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SupCom2ModPackager.Extensions;
+using SupCom2ModPackager.Utility;
 
 namespace SupCom2ModPackager.Controls
 {

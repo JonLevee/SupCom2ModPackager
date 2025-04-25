@@ -6,12 +6,14 @@ using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.VisualBasic;
 using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Models;
+using SupCom2ModPackager.Utility;
 
 namespace SupCom2ModPackager.Collections;
 
 public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDisposable
 {
     public static readonly DisplayItemCollection Empty = new();
+
 
     public string Path
     {

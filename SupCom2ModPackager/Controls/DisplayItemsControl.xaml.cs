@@ -42,7 +42,6 @@ namespace SupCom2ModPackager.Controls
             _fileSystemWatcher.EnableRaisingEvents = false;
 
             PropertySyncManager.Sync(_items, PathLink, x => x.Path, x => x.Path);
-            PropertySyncManager.Sync(_items, settings, x => x.Path, x => x.ModPath);
 
             ExtractionProgress.Visibility = Vis.Hidden;
             ExtractionProgressBar.Value = -1;
@@ -59,6 +58,8 @@ namespace SupCom2ModPackager.Controls
             PathDataGrid.SelectionChanged += PathDataGrid_SelectionChanged;
             CommandUnpack.Visibility = Vis.Collapsed;
             CommandPack.Visibility = Vis.Collapsed;
+
+            _items.Path = settings.InstalledModsFolder;
         }
 
         private void PathDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,7 +111,6 @@ namespace SupCom2ModPackager.Controls
 
         private async void ActionClicked(object sender, MouseButtonEventArgs e)
         {
-            bogus
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             //    return;
 
