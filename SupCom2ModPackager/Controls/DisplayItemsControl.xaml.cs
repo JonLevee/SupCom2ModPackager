@@ -63,23 +63,16 @@ namespace SupCom2ModPackager.Controls
 
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
 
-            var sortNameColumn = PathDataGrid.Columns.Single(c => c.SortMemberPath == nameof(IDisplayItem.NameSort));
-            var sortNameColumnSortDirection = sortNameColumn.SortDirection;
-            var columnSortDirection = e.Column.SortDirection;
             var sortDescription = collectionView.SortDescriptions.Single();
             var sortDescriptionDirection = sortDescription.Direction;
 
             var newSortDirection = sortDescription.Direction == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
 
-            var parent = PathDataGrid.ItemsSource.Cast<IDisplayItem>().Single(x => x is DisplayItemDirectoryParent) as DisplayItemDirectoryParent;
-            parent!.SortDirection = newSortDirection;
+            var parentDirectory = PathDataGrid.ItemsSource.Cast<IDisplayItem>().Single(x => x is DisplayItemDirectoryParent) as DisplayItemDirectoryParent;
+            parentDirectory!.SortDirection = newSortDirection;
 
             collectionView.SortDescriptions.Clear();
 
-            if (e.Column.SortMemberPath == nameof(IDisplayItem.NameSort) &&
-                sortDescription.PropertyName == nameof(IDisplayItem.NameSort))
-            {
-            }
             collectionView.SortDescriptions.Add(new SortDescription(e.Column.SortMemberPath, newSortDirection));
             collectionView.Refresh();
         }
@@ -94,20 +87,6 @@ namespace SupCom2ModPackager.Controls
         {
             // Return true if the command can execute, otherwise false
             return true;
-        }
-
-        private void PathLink_PathChanged(object? sender, string newPath)
-        {
-            _items.Clear();
-            _items.AddParent(new(newPath));
-            foreach (var dir in Directory.GetDirectories(newPath))
-            {
-                _items.Add(new DirectoryInfo(dir));
-            }
-            foreach (var file in Directory.GetFiles(newPath))
-            {
-                _items.Add(new FileInfo(file));
-            }
         }
 
         private async void ActionClicked(object sender, MouseButtonEventArgs e)
@@ -180,54 +159,5 @@ namespace SupCom2ModPackager.Controls
 
 
 
-    }
-}
-
-public class RelayCommand : ICommand
-{
-    private readonly Action<object?> _execute;
-    private readonly Func<object?, bool>? _canExecute;
-
-    public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
-    {
-        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecute = canExecute;
-    }
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
-
-    public void Execute(object? parameter) => _execute(parameter);
-
-    public event EventHandler? CanExecuteChanged
-    {
-        add => CommandManager.RequerySuggested += value;
-        remove => CommandManager.RequerySuggested -= value;
-    }
-}
-
-public class CustomNameComparer : IComparer<object>
-{
-    private readonly string _specialName;
-
-    public CustomNameComparer(string specialName)
-    {
-        _specialName = specialName;
-    }
-
-    public int Compare(object? x, object? y)
-    {
-        if (x is IDisplayItem itemX && y is IDisplayItem itemY)
-        {
-            // Ensure the special name is always at the top
-            if (itemX.Name == _specialName && itemY.Name != _specialName)
-                return -1;
-            if (itemY.Name == _specialName && itemX.Name != _specialName)
-                return 1;
-
-            // Default comparison for other names
-            return string.Compare(itemX.Name, itemY.Name, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return 0;
     }
 }
