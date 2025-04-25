@@ -179,7 +179,14 @@ namespace SupCom2ModPackager.Controls
 
         private void CommandUnpack_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-
+            Guard.Requires(PathDataGrid.SelectedItem is DisplayItemFile);
+            var fileItem = (DisplayItemFile)PathDataGrid.SelectedItem;
+            /*
+             * add check if directory already exists ... no unpack button?
+             * add action delete on file and directory
+             * add progress bar control
+             */
+            foo
         }
 
         private void CommandPack_Click(object sender, System.Windows.RoutedEventArgs e)
