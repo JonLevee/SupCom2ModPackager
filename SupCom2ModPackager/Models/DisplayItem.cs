@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using SupCom2ModPackager.Collections;
 
 namespace SupCom2ModPackager.Models;
@@ -8,10 +9,13 @@ namespace SupCom2ModPackager.Models;
 public interface IDisplayItem : INotifyPropertyChanged
 {
     string Name { get; }
-    string SortName { get; }
+    string NameSort { get; }
     string FullPath { get; }
     DateTime Modified { get; }
+    DateTime ModifiedSort { get; }
     string Action { get; }
+    string ActionSort { get; }
+    Visibility ActionVisibility { get; }
     bool Exists { get; }
 }
 
@@ -24,10 +28,13 @@ public class DisplayItem : IDisplayItem
     protected readonly DisplayItemCollection collection = DisplayItemCollection.Empty;
 
     public virtual string Name => throw new NotImplementedException();
-    public virtual string SortName => Name;
+    public virtual string NameSort => Name;
     public virtual string FullPath => throw new NotImplementedException();
     public virtual DateTime Modified => throw new NotImplementedException();
+    public virtual DateTime ModifiedSort => Modified;
     public string Action => GetAction();
+    public virtual string ActionSort => Action;
+    public virtual Visibility ActionVisibility => string.IsNullOrEmpty(Action) ? Visibility.Collapsed : Visibility.Visible;
     public virtual bool Exists => false;
 
     private DisplayItem() { }

@@ -56,21 +56,21 @@
                     </Style>
                 </DataGrid.RowStyle>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Name" SortMemberPath="Name" Width="*" SortDirection="Ascending" CanUserSort="True">
+                    <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" IsHitTestVisible="False" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Modified" SortMemberPath="Modified" Width="160"  CanUserSort="True">
+                    <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending"  CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Modified}" IsHitTestVisible="False" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Action" SortMemberPath="Action" Width="80" CanUserSort="True">
+                    <DataGridTemplateColumn Header="Action" SortMemberPath="ActionSort" Width="80" SortDirection="Ascending"  CanUserSort="True">
                         <DataGridTemplateColumn.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Setter Property="Background" Value="Transparent" />
@@ -97,16 +97,8 @@
                                     <Button x:Name="ActionButton" 
                                         Command="{Binding ActionCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                         CommandParameter="{Binding}"
+                                        Visibility="{Binding ActionVisibility}"
                                         Content="test"
-                                        Background="Transparent" 
-                                        BorderBrush="Transparent" 
-                                        Foreground="Black" 
-                                        FontWeight="Normal" 
-                                        IsHitTestVisible="True" />
-                                    <TextBlock Text="{Binding Action}" IsHitTestVisible="True" />
-                                    <Button x:Name="ActionButton2" 
-                                        Command="{Binding Path=ActionCommand}" 
-                                        CommandParameter="{Binding Path=Action}" 
                                         Background="Transparent" 
                                         BorderBrush="Transparent" 
                                         Foreground="Black" 

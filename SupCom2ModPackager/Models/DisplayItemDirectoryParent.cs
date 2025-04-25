@@ -1,5 +1,7 @@
 ﻿using SupCom2ModPackager.Collections;
 using SupCom2ModPackager.Extensions;
+using System.ComponentModel;
+using System.DirectoryServices;
 using System.IO;
 
 namespace SupCom2ModPackager.Models;
@@ -10,6 +12,11 @@ public class DisplayItemDirectoryParent : DisplayItemDirectory
     private readonly DirectoryInfo info;
 
     public override string Name => "...";
+    public override string NameSort => SortDirection == ListSortDirection.Ascending ? " " : "zzz";
+    public override DateTime ModifiedSort => SortDirection == ListSortDirection.Ascending ? DateTime.MinValue : DateTime.MaxValue;
+    public override string ActionSort => SortDirection == ListSortDirection.Ascending ? " " : "zzz";
+
+    public ListSortDirection SortDirection { get; set; } = ListSortDirection.Ascending;
 
     public DisplayItemDirectoryParent(DisplayItemCollection collection, DirectoryInfo info) : base(collection, info)
     {

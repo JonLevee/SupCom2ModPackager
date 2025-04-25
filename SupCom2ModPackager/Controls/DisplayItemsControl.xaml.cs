@@ -50,21 +50,37 @@ namespace SupCom2ModPackager.Controls
             CurrentFileTextBlock.Text = string.Empty;
 
             PathDataGrid.ItemsSource = _items;
-            // Automatically sort the DataGrid by Name
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
             collectionView.SortDescriptions.Clear();
-            collectionView.SortDescriptions.Add(new SortDescription(nameof(DisplayItem.Name), ListSortDirection.Ascending));
+            collectionView.SortDescriptions.Add(new SortDescription(nameof(IDisplayItem.NameSort), ListSortDirection.Ascending));
             collectionView.Refresh();
-            PathDataGrid.Sorting += PathDataGrid_Sorting;
         }
 
         private void PathDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
         {
             e.Handled = true; // Prevent default sorting behavior
 
+
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
+
+            var sortNameColumn = PathDataGrid.Columns.Single(c => c.SortMemberPath == nameof(IDisplayItem.NameSort));
+            var sortNameColumnSortDirection = sortNameColumn.SortDirection;
+            var columnSortDirection = e.Column.SortDirection;
+            var sortDescription = collectionView.SortDescriptions.Single();
+            var sortDescriptionDirection = sortDescription.Direction;
+
+            var newSortDirection = sortDescription.Direction == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+
+            var parent = PathDataGrid.ItemsSource.Cast<IDisplayItem>().Single(x => x is DisplayItemDirectoryParent) as DisplayItemDirectoryParent;
+            parent!.SortDirection = newSortDirection;
+
             collectionView.SortDescriptions.Clear();
-            collectionView.SortDescriptions.Add(new SortDescription(e.Column.SortMemberPath, ListSortDirection.Ascending));
+
+            if (e.Column.SortMemberPath == nameof(IDisplayItem.NameSort) &&
+                sortDescription.PropertyName == nameof(IDisplayItem.NameSort))
+            {
+            }
+            collectionView.SortDescriptions.Add(new SortDescription(e.Column.SortMemberPath, newSortDirection));
             collectionView.Refresh();
         }
 
@@ -186,5 +202,32 @@ public class RelayCommand : ICommand
     {
         add => CommandManager.RequerySuggested += value;
         remove => CommandManager.RequerySuggested -= value;
+    }
+}
+
+public class CustomNameComparer : IComparer<object>
+{
+    private readonly string _specialName;
+
+    public CustomNameComparer(string specialName)
+    {
+        _specialName = specialName;
+    }
+
+    public int Compare(object? x, object? y)
+    {
+        if (x is IDisplayItem itemX && y is IDisplayItem itemY)
+        {
+            // Ensure the special name is always at the top
+            if (itemX.Name == _specialName && itemY.Name != _specialName)
+                return -1;
+            if (itemY.Name == _specialName && itemX.Name != _specialName)
+                return 1;
+
+            // Default comparison for other names
+            return string.Compare(itemX.Name, itemY.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return 0;
     }
 }
