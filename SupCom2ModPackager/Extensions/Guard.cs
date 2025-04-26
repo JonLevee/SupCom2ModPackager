@@ -16,7 +16,10 @@ namespace SupCom2ModPackager.Extensions
             [DoesNotReturnIf(false)]
             bool condition)
         {
-            Requires(condition, "Condition is not met.");
+            if (!condition)
+            {
+                throw new InvalidOperationException("Condition is not met.");
+            }
         }
 
         [Conditional("CONTRACTS_FULL")]

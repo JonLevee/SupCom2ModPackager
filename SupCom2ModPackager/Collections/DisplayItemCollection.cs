@@ -10,19 +10,16 @@ using SupCom2ModPackager.Utility;
 
 namespace SupCom2ModPackager.Collections;
 
-public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDisposable
+public class DisplayItemCollection : ObservableCollection<IDisplayItem>
 {
     public static readonly DisplayItemCollection Empty = new();
 
 
+    private string _path = string.Empty;
     public string Path
     {
-        get => this.GetSyncValue<string>();
-        set
-        {
-            if (this.SetSyncValue(value))
-                Load();
-        }
+        get => _path;
+        set => Load(value);
     }
 
     public DisplayItemCollection()
@@ -67,10 +64,12 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDispos
         return false;
     }
 
-    public void Load()
+    public void Load(string path)
     {
-        if (string.IsNullOrEmpty(Path) || !Directory.Exists(Path))
+
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
             return;
+        _path = path;
         Clear();
         var directoryInfo = new DirectoryInfo(Path);
         AddParent(directoryInfo);
@@ -83,11 +82,5 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>, IDispos
             Add(directory);
         }
     }
-
-    public void Dispose()
-    {
-        PropertySyncManager.Remove(this);
-    }
-
 }
 

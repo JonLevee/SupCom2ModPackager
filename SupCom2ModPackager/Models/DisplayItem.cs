@@ -14,17 +14,24 @@ public interface IDisplayItem : INotifyPropertyChanged
     DateTime Modified { get; }
     DateTime ModifiedSort { get; }
     bool Exists { get; }
-    Visibility StatusTextVisible { get; }
-    Visibility ProgressVisible { get; }
-    Visibility ColumnsVisible { get; }
+    Visibility StatusTextVisible { get; set; }
+    Visibility ProgressVisible { get; set; }
+    Visibility ColumnsVisible { get; set; }
+    string StatusText { get; set; }
+    double ProgressMaximum { get; set; }
+    double ProgressValue { get; set; }
 }
 
 [DebuggerDisplay("{Name} Exists:{Exists}")]
 public class DisplayItem : IDisplayItem
 {
+    private string statusText = string.Empty;
+    private Visibility statusTextVisible = Visibility.Collapsed;
+    private Visibility progressVisible = Visibility.Collapsed;
+    private Visibility columnsVisible = Visibility.Collapsed;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public static readonly DisplayItem Empty = new DisplayItem();
     protected readonly DisplayItemCollection collection = DisplayItemCollection.Empty;
 
     public virtual string Name => throw new NotImplementedException();
@@ -32,11 +39,44 @@ public class DisplayItem : IDisplayItem
     public virtual string FullPath => throw new NotImplementedException();
     public virtual DateTime Modified => throw new NotImplementedException();
     public virtual DateTime ModifiedSort => Modified;
-    public virtual bool Exists => false;
+    public virtual bool Exists => throw new NotImplementedException();
 
-    public Visibility StatusTextVisible { get; set; } = Visibility.Collapsed;
-    public Visibility ProgressVisible { get; set; } = Visibility.Collapsed;
-    public Visibility ColumnsVisible { get; set; } = Visibility.Visible;
+    public Visibility StatusTextVisible
+    {
+        get => statusTextVisible;
+        set => SetValue(value, ref statusTextVisible);
+    }
+    public Visibility ProgressVisible
+    {
+        get => progressVisible;
+        set => SetValue(value, ref progressVisible);
+    }
+
+    public Visibility ColumnsVisible
+    {
+        get => columnsVisible;
+        set => SetValue(value, ref columnsVisible);
+    }
+    public string StatusText
+    {
+        get => statusText;
+        set => SetValue(value, ref statusText);
+    }
+
+    private double progressMaximum = 100;
+    public double ProgressMaximum
+    {
+        get => progressMaximum;
+        set => SetValue(value, ref progressMaximum);
+    }
+
+    private double progressValue = 0;
+    public double ProgressValue
+    {
+        get => progressValue;
+        set => SetValue(value, ref progressValue);
+    }
+
     private DisplayItem() { }
 
     protected DisplayItem(DisplayItemCollection collection)
@@ -44,14 +84,15 @@ public class DisplayItem : IDisplayItem
         this.collection = collection;
     }
 
-    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    protected void SetValue<T>(T value, ref T backingField, [CallerMemberName] string memberName = null!)
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        return true;
+        if (!EqualityComparer<T>.Default.Equals(backingField, value))
+        {
+            backingField = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
+        }
     }
+
 }
 
 

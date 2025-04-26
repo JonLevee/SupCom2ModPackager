@@ -55,8 +55,6 @@ namespace SupCom2ModPackager.Controls
 
             _fileSystemWatcher.EnableRaisingEvents = false;
 
-            PropertySyncManager.Sync(_items, PathLink, x => x.Path, x => x.Path);
-
             PathDataGrid.ItemsSource = _items;
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
             collectionView.SortDescriptions.Clear();
@@ -134,7 +132,7 @@ namespace SupCom2ModPackager.Controls
             collectionView.Refresh();
         }
 
-        private async void ActionClicked(object sender, MouseButtonEventArgs e)
+        private void ActionClicked(object sender, MouseButtonEventArgs e)
         {
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             //    return;

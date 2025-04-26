@@ -25,14 +25,11 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class PathLinkControl : UserControl
     {
+        private string _path = string.Empty;
         public string Path
         {
-            get => this.GetSyncValue<string>();
-            set
-            {
-                if (this.SetSyncValue(value))
-                    SetPath(value);
-            }
+            get => _path;
+            set => SetPath(value);
         }
 
         public string GetParentPath()
@@ -49,6 +46,7 @@ namespace SupCom2ModPackager.Controls
 
         private void SetPath(string newPath)
         {
+            _path = newPath;
             var sb = new StringBuilder();
             var pathParts = newPath.Split(System.IO.Path.DirectorySeparatorChar);
             for (int i = 0; i < pathParts.Length; i++)

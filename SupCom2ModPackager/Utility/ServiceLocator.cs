@@ -65,6 +65,7 @@ namespace SupCom2ModPackager.Utility
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddSingleton<SharedPropertyOrchestrator>();
                     services.AddSingleton<SC2ModPackager>();
                     services.AddSingleton<DisplayItemCollection>();
                     services.AddSingleton<SourceItemCollection>();
@@ -75,9 +76,9 @@ namespace SupCom2ModPackager.Utility
                         additionalServices(services);
 
                     services.AddSingleton<MainWindow>();
-                    services.AddSingleton<SourcesViewControl>();
-                    services.AddSingleton<PathLinkControl>();
-                    services.AddSingleton<DisplayItemsControl>();
+                    services.AddTransient<SourcesViewControl>();
+                    services.AddTransient<PathLinkControl>();
+                    services.AddTransient<DisplayItemsControl>();
 
                 })
                 .Build();
@@ -155,3 +156,4 @@ namespace SupCom2ModPackager.Utility
         //}
     }
 }
+

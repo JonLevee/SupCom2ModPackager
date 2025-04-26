@@ -8,7 +8,6 @@ namespace SupCom2ModPackager.Models;
 
 public class DisplayItemDirectoryParent : DisplayItem
 {
-    public static new readonly DisplayItemDirectoryParent Empty = new(DisplayItemCollection.Empty, null!);
     private readonly DirectoryInfo info;
 
     public override string Name => "...";

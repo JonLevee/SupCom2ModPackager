@@ -6,7 +6,6 @@ namespace SupCom2ModPackager.Models;
 
 public class DisplayItemDirectory : DisplayItem
 {
-    public new static readonly DisplayItemDirectory Empty = new(DisplayItemCollection.Empty, new DirectoryInfo(@"C:\"));
     public static readonly DisplayItemDirectory Bogus = new(DisplayItemCollection.Empty, new DirectoryInfo(@"C:\Bogus"));
     private readonly DirectoryInfo info;
 

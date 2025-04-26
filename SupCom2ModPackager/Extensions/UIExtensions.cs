@@ -37,22 +37,5 @@ namespace SupCom2ModPackager.Extensions
         /// </summary>
         public static T? GetAncestorOfType<T>(this Visual element)
             where T : Visual => GetAncestorOfType(element, typeof(T)) as T;
-
-        public static bool TryGetDisplayItem(this DataGrid myGrid, MouseButtonEventArgs e, out string column, out DisplayItem item)
-        {
-            Point mousePos = e.GetPosition(myGrid);
-
-            var element = myGrid.InputHitTest(mousePos) as Visual;
-            var cell = element?.GetAncestorOfType<DataGridCell>();
-            if (cell != null)
-            {
-                column = myGrid.Columns[cell.Column.DisplayIndex].Header.ToString() ?? "Unknown";
-                item = (DisplayItem)((DataGridRow)cell.BindingGroup.Owner).Item;
-                return true;
-            }
-            column = string.Empty;
-            item = DisplayItem.Empty;
-            return false;
-        }
     }
 }
