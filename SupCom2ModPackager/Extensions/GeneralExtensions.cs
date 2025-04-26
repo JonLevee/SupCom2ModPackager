@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Collections;
 using System.Reflection;
+using SupCom2ModPackager.Models;
 
 namespace SupCom2ModPackager.Extensions
 {
@@ -21,23 +22,6 @@ namespace SupCom2ModPackager.Extensions
             return true;
         }
 
-        public static string? GetCompressedFileName(this string directory)
-        {
-            var compressedFile = CompressedExtensions
-                .Select(ext => directory + ext)
-                .FirstOrDefault(File.Exists);
-            return compressedFile;
-        }
-
-        public static bool HasSupCom2CompressedFile(this string directory)
-        {
-            if (CompressedExtensions.Select(ext => directory + ext).Any(File.Exists))
-            {
-                if (SupCom2Files.All(file => File.Exists(Path.Combine(directory, file))))
-                    return true;
-            }
-            return false;
-        }
 
         public static IList GetListOrDefault(this IList? list)
         {

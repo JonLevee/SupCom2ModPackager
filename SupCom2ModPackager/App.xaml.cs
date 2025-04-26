@@ -5,6 +5,7 @@ using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Utility;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 using WpfScreenHelper;
@@ -14,7 +15,7 @@ namespace SupCom2ModPackager
     {
         public App()
         {
-
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             ServiceLocator.ConfigureServices(services =>
             {
             });

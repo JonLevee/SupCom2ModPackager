@@ -8,73 +8,103 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <StackPanel 
-            x:Name="ExtractionProgress" 
-            Visibility="Hidden"
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Background="White" 
-            Opacity="1" 
-            Panel.ZIndex="200" 
-            Width="574" 
-            Height="45" 
-            Margin="0,100,0,0">
-            <ProgressBar x:Name="ExtractionProgressBar" Height="20" Minimum="0" Maximum="100" />
-            <TextBlock x:Name="CurrentFileTextBlock" Margin="0,5,0,0" Text="Ready" TextAlignment="Left" />
-        </StackPanel>
-        <StackPanel Margin="0,0,0,0">
-            <controls:PathLinkControl x:Name="PathLink" HorizontalAlignment="Left" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <DataGrid 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <controls:PathLinkControl 
+            x:Name="PathLink" 
+            Grid.Row="0"
+            HorizontalAlignment="Stretch"
+            />
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!-- DataGrid -->
+                <ColumnDefinition Width="800" />
+                <!-- Fixed-width StackPanel -->
+            </Grid.ColumnDefinitions>
+            <DataGrid 
                     x:Name="PathDataGrid" 
+                    Grid.Column="0"
                     AutoGenerateColumns="False" 
                     Margin="0,0,0,0" 
-                    Height="370" 
-                    Width="512"
                     HorizontalAlignment="Left"
                     MouseLeftButtonUp="ActionClicked" 
                     SelectionMode="Single" 
                     SelectionUnit="FullRow"
                     CanUserSortColumns="True"
-                    Sorting="PathDataGrid_Sorting"
-                    >
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
-                            <!-- Setter Property="IsHitTestVisible" Value="False" /-->
-                        </Style>
-                    </DataGrid.RowStyle>
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending"  CanUserSort="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>  
-                                   <TextBlock Text="{Binding Modified, StringFormat='{}{0:MM/dd/yyyy h:mm tt}'}" />  
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <StackPanel Width="287" Height="auto" Orientation="Vertical">
-                    <StackPanel Width="auto" Height="auto" Orientation="Horizontal">
-                        <Border BorderBrush="Black" BorderThickness="1" Padding="5">
-                            <TextBlock Text="Command" FontWeight="DemiBold"/>
-                        </Border>
-                        <Button x:Name="CommandUnpack" Content="Unpack" Width="Auto" Height="Auto" Margin="5,0,0,0" Click="CommandUnpack_Click"/>
-                        <Button x:Name="CommandPack" Content="Pack" Width="Auto" Height="Auto" Margin="5,0,0,0" Click="CommandPack_Click"/>
+                    Sorting="PathDataGrid_Sorting">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <!-- Add any row-specific styling here -->
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <!-- First Column: Name -->
+                    <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                                    <TextBlock Text="{Binding Name}" Visibility="{Binding ColumnsVisible}" />
+                                    <TextBlock 
+                                                Text="{Binding StatusText}" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Left" 
+                                                Visibility="{Binding StatusTextVisible}" />
+                                    <ProgressBar 
+                                                Value="{Binding ProgressValue}" 
+                                                Maximum="{Binding ProgressMaximum}" 
+                                                Height="20" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Stretch" 
+                                                Visibility="{Binding ProgressVisible}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Second Column: Modified -->
+                    <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending" CanUserSort="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Modified, StringFormat='{}{0:MM/dd/yyyy h:mm tt}'}" Visibility="{Binding ColumnsVisible}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <!-- Label -->
+                        <ColumnDefinition Width="*" />
+                        <!-- Buttons -->
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Command:"
+                        VerticalAlignment="Center"
+                        FontWeight="DemiBold"
+                        Margin="5" />
+                    <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Margin="5">
+                        <Button x:Name="CommandUnpack" Content="Pack" Margin="2" Click="CommandUnpack_Click" />
+                        <Button x:Name="CommandPack" Content="Unpack" Margin="2" Click="CommandPack_Click" />
                     </StackPanel>
-                    <Border BorderBrush="Black" BorderThickness="1" Padding="5">
-                       <TextBlock Text="profile.yml"/>
-                   </Border>
-                </StackPanel>
+                </Grid>
 
-            </StackPanel>
-        </StackPanel>
-
+                <WebBrowser 
+                    x:Name="ContentDisplay"
+                    Grid.Row="1"
+                    Margin="5" />
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

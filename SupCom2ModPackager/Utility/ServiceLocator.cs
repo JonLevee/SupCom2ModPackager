@@ -70,6 +70,7 @@ namespace SupCom2ModPackager.Utility
                     services.AddSingleton<SourceItemCollection>();
                     services.AddSingleton(GetSupCom2ModPackagerSettings);
                     services.AddSingleton(GetSupCom2ModPackagerUserSettings);
+                    services.AddTransient<DocumentToHtmlConverter>();
                     if (additionalServices != null)
                         additionalServices(services);
 

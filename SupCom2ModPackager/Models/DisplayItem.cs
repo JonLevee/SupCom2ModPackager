@@ -14,6 +14,9 @@ public interface IDisplayItem : INotifyPropertyChanged
     DateTime Modified { get; }
     DateTime ModifiedSort { get; }
     bool Exists { get; }
+    Visibility StatusTextVisible { get; }
+    Visibility ProgressVisible { get; }
+    Visibility ColumnsVisible { get; }
 }
 
 [DebuggerDisplay("{Name} Exists:{Exists}")]
@@ -31,6 +34,9 @@ public class DisplayItem : IDisplayItem
     public virtual DateTime ModifiedSort => Modified;
     public virtual bool Exists => false;
 
+    public Visibility StatusTextVisible { get; set; } = Visibility.Collapsed;
+    public Visibility ProgressVisible { get; set; } = Visibility.Collapsed;
+    public Visibility ColumnsVisible { get; set; } = Visibility.Visible;
     private DisplayItem() { }
 
     protected DisplayItem(DisplayItemCollection collection)

@@ -19,6 +19,16 @@ public class SC2ModPackager
         this._items = items;
     }
 
+    public bool CanUnpack(DisplayItemFile itemFile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool CanPack(DisplayItemDirectory itemDirectory)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task UnpackAsync(DisplayItemFile itemFile, bool overWrite, IProgress<PackProgressArgs> progress)
     {
         Guard.Requires(itemFile.FullPath.IsCompressedFile(), $"File {itemFile.Name} extension is not one of [{string.Join(',', GeneralExtensions.CompressedExtensions)}]");
