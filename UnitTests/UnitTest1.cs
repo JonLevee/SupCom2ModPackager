@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using SupCom2ModPackager;
 using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Utility;
@@ -35,21 +36,61 @@ namespace UnitTests
         public void Test2()
         {
             var orchestrator = new SharedPropertyOrchestrator();
-            var test1FormA = new TestFormA(orchestrator);
-            var test2FormA = new TestFormA(orchestrator);
-            var testFormB = new TestFormB(orchestrator);
 
-            test1FormA.PropertyChanged += (sender, args) => Log(sender, args, nameof(test1FormA));
-            test2FormA.PropertyChanged += (sender, args) => Log(sender, args, nameof(test2FormA));
-            testFormB.PropertyChanged += (sender, args) => Log(sender, args, nameof(testFormB));
+            RunTest2(orchestrator);
+            Assert.Equal(0, orchestrator.RegistrationCount);
 
-            _output.WriteLine("Setting Path to TestPath");
-            orchestrator.Path = "TestPath";
+
 
             /*
              * try calling setter to reference shared property
              */
         }
+
+        private void RunTest2(SharedPropertyOrchestrator orchestrator)
+        {
+            using var test1FormA = new TestFormA(orchestrator);
+            using var test2FormA = new TestFormA(orchestrator);
+            using var testFormB = new TestFormB(orchestrator);
+            test1FormA.PropertyChanged += (sender, args) => Log(sender, args, nameof(test1FormA));
+            test2FormA.PropertyChanged += (sender, args) => Log(sender, args, nameof(test2FormA));
+            testFormB.PropertyChanged += (sender, args) => Log(sender, args, nameof(testFormB));
+
+            int count = 0;
+            var value = string.Empty;
+            value = RunAndVerify("orchestrator", orchestrator, i => i.Path, ref count);
+            Assert.Equal(value, orchestrator.Path);
+            Assert.Equal(value, test1FormA.Path);
+            Assert.Equal(value, test2FormA.Path);
+            Assert.Equal(value, testFormB.DisplayPath);
+            value = RunAndVerify("test1FormA", test1FormA, i => i.Path, ref count);
+            Assert.Equal(value, orchestrator.Path);
+            Assert.Equal(value, test1FormA.Path);
+            Assert.Equal(value, test2FormA.Path);
+            Assert.Equal(value, testFormB.DisplayPath);
+            value = RunAndVerify("test2FormA", test2FormA, i => i.Path, ref count);
+            Assert.Equal(value, orchestrator.Path);
+            Assert.Equal(value, test1FormA.Path);
+            Assert.Equal(value, test2FormA.Path);
+            Assert.Equal(value, testFormB.DisplayPath);
+            value = RunAndVerify("testFormB", testFormB, i => i.DisplayPath, ref count);
+            Assert.Equal(value, orchestrator.Path);
+            Assert.Equal(value, test1FormA.Path);
+            Assert.Equal(value, test2FormA.Path);
+            Assert.Equal(value, testFormB.DisplayPath);
+        }
+
+        private string RunAndVerify<T, V>(string instanceName, T instance, Expression<Func<T, V>> expression, ref int count)
+        {
+            var value = "TestPath" + count.ToString();
+            ++count;
+            var property = (PropertyInfo)(expression.Body as MemberExpression)!.Member;
+            _output.WriteLine("");
+            _output.WriteLine($"Setting {instanceName}.{property.Name} to {value}");
+            property.SetValue(instance, value);
+            return value;
+        }
+
 
         private void Log(object? sender, PropertyChangedEventArgs args, string caller)
         {
@@ -60,10 +101,11 @@ namespace UnitTests
         {
             void OnPropertyChanged([CallerMemberName] string propertyName = null!);
         }
-        public class SharedPropertyOrchestrator : INotifyPropertyChanged
+        public class SharedPropertyOrchestrator
         {
             private readonly Dictionary<object, Registration> registrations = [];
-            public event PropertyChangedEventHandler? PropertyChanged;
+
+            public int RegistrationCount => registrations.Count;
 
             private string path = string.Empty;
             public string Path
@@ -105,16 +147,6 @@ namespace UnitTests
                 registration.Add(sharedPropertyName, callerPropertyName);
             }
 
-            internal T GetValue<T>(object instance, [CallerMemberName] string propertyName = null!)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetValue<T>(object instance, T newValue, [CallerMemberName] string propertyName = null!)
-            {
-                throw new NotImplementedException();
-            }
-
             private Registration GetRegistration(object instance)
             {
                 if (registrations.TryGetValue(instance, out Registration? registration))
@@ -135,9 +167,8 @@ namespace UnitTests
                     OnPropertyChanged = onPropertyChanged;
                 }
             }
-
         }
-        public class TestFormA : ISharedPropertySubscriber
+        public class TestFormA : INotifyPropertyChanged, IDisposable
         {
             private readonly SharedPropertyOrchestrator orchestrator;
 
@@ -166,7 +197,7 @@ namespace UnitTests
                 orchestrator.Unregister(this);
             }
         }
-        public class TestFormB : ISharedPropertySubscriber
+        public class TestFormB : INotifyPropertyChanged, IDisposable
         {
             private readonly SharedPropertyOrchestrator orchestrator;
 
