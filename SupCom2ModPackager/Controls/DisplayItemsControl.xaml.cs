@@ -8,18 +8,19 @@ using System.IO;
 using System.Windows.Data;
 using SupCom2ModPackager.Collections;
 using Vis = System.Windows.Visibility;
+using System.Windows.Media;
+using System.Windows;
 
 namespace SupCom2ModPackager.Controls
 {
     /// <summary>
     /// Interaction logic for DisplayItemsControl.xaml
     /// </summary>
-    public partial class DisplayItemsControl : UserControl, IDisposable
+    public partial class DisplayItemsControl : UserControl
     {
         private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
         private readonly SC2ModPackager _modPackager = ServiceLocator.GetRequiredService<SC2ModPackager>();
         private readonly SupCom2ModPackagerSettings settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
-        private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly DocumentToHtmlConverter documentToHtmlConverter = ServiceLocator.GetRequiredService<DocumentToHtmlConverter>();
 
         public DisplayItemsControl()
@@ -27,33 +28,6 @@ namespace SupCom2ModPackager.Controls
 
             InitializeComponent();
 
-            _fileSystemWatcher = new FileSystemWatcher
-            {
-                IncludeSubdirectories = false,
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
-                Filter = "*",
-                EnableRaisingEvents = false
-            };
-            _fileSystemWatcher.Created += (o, e) =>
-            {
-                _items.TryRemove(e.FullPath, out _);
-            };
-            _fileSystemWatcher.Deleted += (o, e) =>
-            {
-                if (File.Exists(e.FullPath))
-                {
-                    _items.Add(new FileInfo(e.FullPath));
-                    return;
-                }
-                if (Directory.Exists(e.FullPath))
-                {
-                    _items.Add(new DirectoryInfo(e.FullPath));
-                    return;
-                }
-                throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
-            };
-
-            _fileSystemWatcher.EnableRaisingEvents = false;
 
             PathDataGrid.ItemsSource = _items;
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
@@ -65,19 +39,26 @@ namespace SupCom2ModPackager.Controls
             PathDataGrid.SelectionChanged += ContentDisplayHandler;
             CommandUnpack.Visibility = Vis.Collapsed;
             CommandPack.Visibility = Vis.Collapsed;
-
-            _items.Path = settings.InstalledModsFolder;
         }
 
 
-        private void CommandUnpack_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void CommandUnpack_Click(object sender, RoutedEventArgs e)
         {
             var fileItem = (DisplayItemFile)PathDataGrid.SelectedItem;
-            /*
-             * add check if directory already exists ... no unpack button?
-             * add action delete on file and directory
-             * add progress bar control
-             */
+            var progress = new Progress<string>(text =>
+            {
+                if (text != null)
+                {
+                    fileItem.StatusTextVisible = Vis.Visible;
+                    fileItem.ColumnsVisible = Vis.Collapsed;
+                    fileItem.ProgressVisible = Vis.Collapsed;
+                    fileItem.StatusText = text;
+                    return;
+                }
+                ++fileItem.ProgressValue;
+            });
+
+            await _modPackager.UnpackAsync(fileItem, true, progress);
         }
 
         private void CommandPack_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -137,7 +118,7 @@ namespace SupCom2ModPackager.Controls
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             //    return;
 
-            //if (item.Action == "UnpackAsync")
+            //if (item.Action == "UnpackAsync_delete")
             //{
             //    var fileItem = (DisplayItemFile)item;
 
@@ -164,7 +145,7 @@ namespace SupCom2ModPackager.Controls
             //    var overWrite = false;
             //    if (Directory.Exists(fileItem.UnpackDirectoryPath))
             //    {
-            //        //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync will overwrite existing directory", MessageBoxButton.OKCancel);
+            //        //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync_delete will overwrite existing directory", MessageBoxButton.OKCancel);
             //        //if (result == MessageBoxResult.OK)
             //        //{
             //        overWrite = true;
@@ -172,18 +153,12 @@ namespace SupCom2ModPackager.Controls
 
             //    }
 
-            //    await _modPackager.UnpackAsync(fileItem, overWrite, progress);
+            //    await _modPackager.UnpackAsync_delete(fileItem, overWrite, progress);
 
 
             //    // Reset UI after completion
             //    ExtractionProgress.Visibility = Vis.Hidden;
             //}
-        }
-
-
-        public void Dispose()
-        {
-            _fileSystemWatcher.Dispose();
         }
     }
 

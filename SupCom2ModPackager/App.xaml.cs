@@ -47,10 +47,10 @@ namespace SupCom2ModPackager
                 }
             }
 
-            var path = GeneralExtensions
-                .GetValidDrives()
-                .Select(name => @$"{name}SC2Mods\Testing\Partial")
-                .First(Directory.Exists);
+            var sharedData = ServiceLocator.GetRequiredService<SharedData>();
+            var modSettings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
+            sharedData.CurrentPath = modSettings.InstalledModsFolder;
+
             mainWindow.Show();
         }
 

@@ -10,6 +10,7 @@ public class DisplayItemDirectory : DisplayItem
     private readonly DirectoryInfo info;
 
     public override string Name => info.Name;
+    public override string NameSort => info.Name + "\t";
     public override string FullPath => info.FullName;
     public override DateTime Modified => info.LastWriteTime;
     public override bool Exists => info.Exists;

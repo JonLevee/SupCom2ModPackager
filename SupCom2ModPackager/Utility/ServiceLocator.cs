@@ -65,7 +65,7 @@ namespace SupCom2ModPackager.Utility
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddSingleton<SharedPropertyOrchestrator>();
+                    services.AddSingleton<SharedData>();
                     services.AddSingleton<SC2ModPackager>();
                     services.AddSingleton<DisplayItemCollection>();
                     services.AddSingleton<SourceItemCollection>();

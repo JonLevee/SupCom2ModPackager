@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -23,13 +24,24 @@ namespace SupCom2ModPackager.Controls
     /// <summary>
     /// Interaction logic for PathLinkControl.xaml
     /// </summary>
-    public partial class PathLinkControl : UserControl
+    public partial class PathLinkControl : UserControl, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private readonly SharedData sharedData;
+
         private string _path = string.Empty;
         public string Path
         {
             get => _path;
-            set => SetPath(value);
+            set
+            {
+                if (!EqualityComparer<string>.Default.Equals(_path, value))
+                {
+                    _path = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path)));
+                    SetPath(value);
+                }
+            }
         }
 
         public string GetParentPath()
@@ -39,6 +51,14 @@ namespace SupCom2ModPackager.Controls
 
         public PathLinkControl()
         {
+            sharedData = ServiceLocator.GetRequiredService<SharedData>();
+            sharedData.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(sharedData.CurrentPath))
+                {
+                    Path = sharedData.CurrentPath;
+                }
+            };
             InitializeComponent();
             PathPanel.Children.Clear();
         }
@@ -86,6 +106,14 @@ namespace SupCom2ModPackager.Controls
         private void PathButtonClicked(object sender, RoutedEventArgs e)
         {
             this.Path = (string)((Button)sender).Tag;
+        }
+
+        private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2) // Check for double-click
+            {
+                Process.Start("explorer.exe", Path);
+            }
         }
     }
 }

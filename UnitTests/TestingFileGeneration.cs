@@ -40,7 +40,7 @@ namespace UnitTests
             {
                 if (!Directory.Exists(item.UnpackDirectoryPath))
                 {
-                    await packager.UnpackAsync(item, false, progress);
+                    await packager.UnpackAsync_delete(item, false, progress);
                 }
             }
             foreach (var item in collection.Directories.ToList())

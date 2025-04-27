@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Shapes;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.VisualBasic;
+using RtfPipe.Tokens;
 using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Models;
 using SupCom2ModPackager.Utility;
@@ -12,18 +14,72 @@ namespace SupCom2ModPackager.Collections;
 
 public class DisplayItemCollection : ObservableCollection<IDisplayItem>
 {
-    public static readonly DisplayItemCollection Empty = new();
+    public static readonly DisplayItemCollection Empty = new(null!);
+    private readonly SharedData sharedData;
+    private readonly FileSystemWatcher _fileSystemWatcher;
 
-
-    private string _path = string.Empty;
+    private string path = string.Empty;
     public string Path
     {
-        get => _path;
-        set => Load(value);
+        get => path;
+        set
+        {
+            if (!EqualityComparer<string>.Default.Equals(path, value))
+            {
+                path = value;
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Path)));
+                Load();
+            }
+        }
     }
 
-    public DisplayItemCollection()
+    public DisplayItemCollection(SharedData sharedData)
     {
+        _fileSystemWatcher = null!;
+        this.sharedData = null!;
+        if (sharedData == null)
+            return;
+        this.sharedData = sharedData;
+        sharedData.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(sharedData.CurrentPath))
+            {
+                Path = sharedData.CurrentPath;
+            }
+        };
+        _fileSystemWatcher = new FileSystemWatcher
+        {
+            IncludeSubdirectories = false,
+            NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
+            Filter = "*",
+            EnableRaisingEvents = false
+        };
+        _fileSystemWatcher.Deleted += (o, e) =>
+        {
+            var item = this.FirstOrDefault(i => i.FullPath == e.FullPath);
+            if (item != null)
+            {
+                Application.Current.Dispatcher.Invoke(() => Remove(item));
+            }
+
+        };
+        _fileSystemWatcher.Created += (o, e) =>
+        {
+            if (File.Exists(e.FullPath))
+            {
+                Application.Current.Dispatcher.Invoke(() => Add(new DisplayItemFile(this, new FileInfo(e.FullPath))));
+                return;
+            }
+            if (Directory.Exists(e.FullPath))
+            {
+                Application.Current.Dispatcher.Invoke(() => Add(new DisplayItemDirectory(this, new DirectoryInfo(e.FullPath))));
+                return;
+            }
+            throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
+        };
+
+        _fileSystemWatcher.EnableRaisingEvents = false;
+
     }
 
     public IEnumerable<DisplayItemFile> Files => this.Where(item => item is DisplayItemFile).Cast<DisplayItemFile>();
@@ -31,56 +87,25 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>
         .Where(item => item is DisplayItemDirectory && !(item is DisplayItemDirectoryParent))
         .Cast<DisplayItemDirectory>();
 
-
-    public DisplayItemFile Add(FileInfo info)
+    public void Load()
     {
-        var item = new DisplayItemFile(this, info);
-        Add(item);
-        return item;
-    }
-
-    public DisplayItemDirectory Add(DirectoryInfo info)
-    {
-        var item = new DisplayItemDirectory(this, info);
-        Add(item);
-        return item;
-    }
-
-    public DisplayItemDirectoryParent AddParent(DirectoryInfo info)
-    {
-        var item = new DisplayItemDirectoryParent(this, info);
-        Add(item);
-        return item;
-    }
-
-    public bool TryRemove(string path, out IDisplayItem? item)
-    {
-        item = this.FirstOrDefault(i => i.FullPath == path);
-        if (item != null)
-        {
-            Remove(item);
-            return true;
-        }
-        return false;
-    }
-
-    public void Load(string path)
-    {
-
-        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+        if (string.IsNullOrEmpty(sharedData.CurrentPath) || !Directory.Exists(sharedData.CurrentPath))
             return;
         _path = path;
         Clear();
-        var directoryInfo = new DirectoryInfo(Path);
-        AddParent(directoryInfo);
+        _fileSystemWatcher.Path = sharedData.CurrentPath;
+        var directoryInfo = new DirectoryInfo(sharedData.CurrentPath);
+        Add(new DisplayItemDirectoryParent(this, directoryInfo));
+
         foreach (var file in directoryInfo.GetFiles())
         {
-            Add(file);
+            Add(new DisplayItemFile(this, file));
         }
         foreach (var directory in directoryInfo.GetDirectories())
         {
-            Add(directory);
+            Add(new DisplayItemDirectory(this, directory));
         }
+        _fileSystemWatcher.EnableRaisingEvents = true;
     }
 }
 

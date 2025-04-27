@@ -8,6 +8,8 @@ public class DisplayItemFile : DisplayItem
     private readonly FileInfo info;
 
     public override string Name => info.Name;
+    public override string NameSort => Path.GetFileNameWithoutExtension(Name) + "\t" + Path.GetExtension(Name);
+
     public override string FullPath => info.FullName;
     public override DateTime Modified => info.LastWriteTime;
     public override bool Exists => info.Exists;
