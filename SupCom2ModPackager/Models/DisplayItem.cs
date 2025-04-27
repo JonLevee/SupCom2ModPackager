@@ -14,8 +14,11 @@ public interface IDisplayItem : INotifyPropertyChanged
     DateTime Modified { get; }
     DateTime ModifiedSort { get; }
     bool Exists { get; }
-    Visibility StatusTextVisible { get; }
+    Visibility StatusTextVisible { get; set; }
+    string StatusText { get; set; }
     Visibility ProgressVisible { get; }
+    double ProgressValue { get; set; }
+    double ProgressMaximum { get; set; }
     Visibility ColumnsVisible { get; }
 }
 
@@ -28,15 +31,49 @@ public class DisplayItem : IDisplayItem
     protected readonly DisplayItemCollection collection = DisplayItemCollection.Empty;
 
     public virtual string Name => throw new NotImplementedException();
-    public virtual string NameSort => Name;
+    public virtual string NameSort => throw new NotImplementedException();
     public virtual string FullPath => throw new NotImplementedException();
     public virtual DateTime Modified => throw new NotImplementedException();
     public virtual DateTime ModifiedSort => Modified;
     public virtual bool Exists => false;
 
-    public Visibility StatusTextVisible { get; set; } = Visibility.Collapsed;
-    public Visibility ProgressVisible { get; set; } = Visibility.Collapsed;
-    public Visibility ColumnsVisible { get; set; } = Visibility.Visible;
+    private Visibility statusTextVisible = Visibility.Collapsed;
+    public Visibility StatusTextVisible
+    {
+        get => statusTextVisible;
+        set => SetProperty(ref statusTextVisible, value);
+    }
+    private string statusText = string.Empty;
+    public string StatusText
+    {
+        get => statusText;
+        set => SetProperty(ref statusText, value);
+    }
+
+    private Visibility progressVisible = Visibility.Collapsed;
+    public Visibility ProgressVisible
+    {
+        get => progressVisible;
+        set => SetProperty(ref progressVisible, value);
+    }
+    private double progressValue = 2;
+    public double ProgressValue
+    {
+        get => progressValue;
+        set => SetProperty(ref progressValue, value);
+    }
+    private double progressMaximum = 10;
+    public double ProgressMaximum
+    {
+        get => progressMaximum;
+        set => SetProperty(ref progressMaximum, value);
+    }
+    private Visibility columnsVisible = Visibility.Visible;
+    public Visibility ColumnsVisible
+    {
+        get => columnsVisible;
+        set => SetProperty(ref columnsVisible, value);
+    }
     private DisplayItem() { }
 
     protected DisplayItem(DisplayItemCollection collection)

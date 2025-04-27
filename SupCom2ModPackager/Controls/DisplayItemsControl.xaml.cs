@@ -8,6 +8,8 @@ using System.IO;
 using System.Windows.Data;
 using SupCom2ModPackager.Collections;
 using Vis = System.Windows.Visibility;
+using System.Windows.Media;
+using System.Windows;
 
 namespace SupCom2ModPackager.Controls
 {
@@ -40,14 +42,23 @@ namespace SupCom2ModPackager.Controls
         }
 
 
-        private void CommandUnpack_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void CommandUnpack_Click(object sender, RoutedEventArgs e)
         {
             var fileItem = (DisplayItemFile)PathDataGrid.SelectedItem;
-            /*
-             * add check if directory already exists ... no unpack button?
-             * add action delete on file and directory
-             * add progress bar control
-             */
+            var progress = new Progress<string>(text =>
+            {
+                if (text != null)
+                {
+                    fileItem.StatusTextVisible = Vis.Visible;
+                    fileItem.ColumnsVisible = Vis.Collapsed;
+                    fileItem.ProgressVisible = Vis.Collapsed;
+                    fileItem.StatusText = text;
+                    return;
+                }
+                ++fileItem.ProgressValue;
+            });
+
+            await _modPackager.UnpackAsync(fileItem, true, progress);
         }
 
         private void CommandPack_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -107,7 +118,7 @@ namespace SupCom2ModPackager.Controls
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             //    return;
 
-            //if (item.Action == "UnpackAsync")
+            //if (item.Action == "UnpackAsync_delete")
             //{
             //    var fileItem = (DisplayItemFile)item;
 
@@ -134,7 +145,7 @@ namespace SupCom2ModPackager.Controls
             //    var overWrite = false;
             //    if (Directory.Exists(fileItem.UnpackDirectoryPath))
             //    {
-            //        //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync will overwrite existing directory", MessageBoxButton.OKCancel);
+            //        //var result = MessageBox.Show("Overwrite directory?", "UnpackAsync_delete will overwrite existing directory", MessageBoxButton.OKCancel);
             //        //if (result == MessageBoxResult.OK)
             //        //{
             //        overWrite = true;
@@ -142,7 +153,7 @@ namespace SupCom2ModPackager.Controls
 
             //    }
 
-            //    await _modPackager.UnpackAsync(fileItem, overWrite, progress);
+            //    await _modPackager.UnpackAsync_delete(fileItem, overWrite, progress);
 
 
             //    // Reset UI after completion

@@ -41,30 +41,40 @@
                     </Style>
                 </DataGrid.RowStyle>
                 <DataGrid.Columns>
-                    <!-- First Column: Name -->
                     <DataGridTemplateColumn Header="Name" SortMemberPath="NameSort" Width="*" SortDirection="Ascending" CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                                    <TextBlock Text="{Binding Name}" Visibility="{Binding ColumnsVisible}" />
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
                                     <TextBlock 
-                                                Text="{Binding StatusText}" 
-                                                VerticalAlignment="Center" 
-                                                HorizontalAlignment="Left" 
-                                                Visibility="{Binding StatusTextVisible}" />
+                                        Grid.Row="0"
+                                        Text="{Binding Name}" 
+                                        Visibility="{Binding ColumnsVisible}" 
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Stretch" />
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Text="{Binding StatusText}" 
+                                        Visibility="{Binding StatusTextVisible}"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Stretch" />
                                     <ProgressBar 
-                                                Value="{Binding ProgressValue}" 
-                                                Maximum="{Binding ProgressMaximum}" 
-                                                Height="20" 
-                                                VerticalAlignment="Center" 
-                                                HorizontalAlignment="Stretch" 
-                                                Visibility="{Binding ProgressVisible}" />
-                                </StackPanel>
+                                        Grid.Row="2"
+                                        Value="{Binding ProgressValue}" 
+                                        Minimum="0"
+                                        Maximum="{Binding ProgressMaximum}" 
+                                        Height="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualHeight}" 
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Stretch" 
+                                        Visibility="{Binding ProgressVisible}" />
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!-- Second Column: Modified -->
                     <DataGridTemplateColumn Header="Modified" SortMemberPath="ModifiedSort" Width="160" SortDirection="Ascending" CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
