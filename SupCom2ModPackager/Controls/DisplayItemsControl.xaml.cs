@@ -14,12 +14,11 @@ namespace SupCom2ModPackager.Controls
     /// <summary>
     /// Interaction logic for DisplayItemsControl.xaml
     /// </summary>
-    public partial class DisplayItemsControl : UserControl, IDisposable
+    public partial class DisplayItemsControl : UserControl
     {
         private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
         private readonly SC2ModPackager _modPackager = ServiceLocator.GetRequiredService<SC2ModPackager>();
         private readonly SupCom2ModPackagerSettings settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
-        private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly DocumentToHtmlConverter documentToHtmlConverter = ServiceLocator.GetRequiredService<DocumentToHtmlConverter>();
 
         public DisplayItemsControl()
@@ -27,35 +26,6 @@ namespace SupCom2ModPackager.Controls
 
             InitializeComponent();
 
-            _fileSystemWatcher = new FileSystemWatcher
-            {
-                IncludeSubdirectories = false,
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
-                Filter = "*",
-                EnableRaisingEvents = false
-            };
-            _fileSystemWatcher.Created += (o, e) =>
-            {
-                _items.TryRemove(e.FullPath, out _);
-            };
-            _fileSystemWatcher.Deleted += (o, e) =>
-            {
-                if (File.Exists(e.FullPath))
-                {
-                    _items.Add(new FileInfo(e.FullPath));
-                    return;
-                }
-                if (Directory.Exists(e.FullPath))
-                {
-                    _items.Add(new DirectoryInfo(e.FullPath));
-                    return;
-                }
-                throw new InvalidOperationException($"File system watcher created event for {e.FullPath} but it is not a file or directory");
-            };
-
-            _fileSystemWatcher.EnableRaisingEvents = false;
-
-            PropertySyncManager.Sync(_items, PathLink, x => x.Path, x => x.Path);
 
             PathDataGrid.ItemsSource = _items;
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
@@ -67,8 +37,6 @@ namespace SupCom2ModPackager.Controls
             PathDataGrid.SelectionChanged += ContentDisplayHandler;
             CommandUnpack.Visibility = Vis.Collapsed;
             CommandPack.Visibility = Vis.Collapsed;
-
-            _items.Path = settings.InstalledModsFolder;
         }
 
 
@@ -134,7 +102,7 @@ namespace SupCom2ModPackager.Controls
             collectionView.Refresh();
         }
 
-        private async void ActionClicked(object sender, MouseButtonEventArgs e)
+        private void ActionClicked(object sender, MouseButtonEventArgs e)
         {
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
             //    return;
@@ -180,12 +148,6 @@ namespace SupCom2ModPackager.Controls
             //    // Reset UI after completion
             //    ExtractionProgress.Visibility = Vis.Hidden;
             //}
-        }
-
-
-        public void Dispose()
-        {
-            _fileSystemWatcher.Dispose();
         }
     }
 

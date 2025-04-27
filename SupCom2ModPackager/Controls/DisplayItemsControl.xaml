@@ -95,8 +95,8 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="5">
-                        <Button x:Name="CommandUnpack" Content="Pack" Margin="2" Click="CommandUnpack_Click" />
-                        <Button x:Name="CommandPack" Content="Unpack" Margin="2" Click="CommandPack_Click" />
+                        <Button x:Name="CommandUnpack" Content="Unpack" Margin="2" Click="CommandUnpack_Click" />
+                        <Button x:Name="CommandPack" Content="Pack" Margin="2" Click="CommandPack_Click" />
                     </StackPanel>
                 </Grid>
 

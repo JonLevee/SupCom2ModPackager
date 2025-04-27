@@ -30,42 +30,5 @@ namespace UnitTests
             Assert.NotNull(modPackager);
         }
 
-        [Fact]
-        public void VerifySync()
-        {
-            var modelA = new Model();
-            var modelB = new Model();
-            modelA.PropertyChanged += (sender, args) => _output.WriteLine($"ModelA Property Changed: {args.PropertyName}");
-            modelB.PropertyChanged += (sender, args) => _output.WriteLine($"ModelB Property Changed: {args.PropertyName}");
-            PropertySyncManager.Sync(modelA, modelB, instance => instance.Name);
-
-            Assert.Null(modelA.Name);
-            Assert.Null(modelB.Name);
-
-            modelA.Name = "foo";
-            _output.WriteLine($"ModelA Name: {modelA.Name}");
-            _output.WriteLine($"ModelB Name: {modelB.Name}");
-            //Assert.Same("foo", modelA.Name);
-            //Assert.Same("foo", modelB.Name);
-
-        }
-    }
-
-    public class Model : INotifyPropertyChanged, IDisposable
-    {
-#pragma warning disable CS0067
-        public event PropertyChangedEventHandler? PropertyChanged;
-#pragma warning restore CS0067
-
-        public string Name
-        {
-            get => this.GetSyncValue<string>();
-            set => this.SetSyncValue(value);
-        }
-
-        public void Dispose()
-        {
-            PropertySyncManager.Remove(this);
-        }
     }
 }
