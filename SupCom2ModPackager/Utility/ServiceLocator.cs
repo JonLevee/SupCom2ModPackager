@@ -65,6 +65,7 @@ namespace SupCom2ModPackager.Utility
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddSingleton<SteamInfo>();
                     services.AddSingleton<SharedData>();
                     services.AddSingleton<SC2ModPackager>();
                     services.AddSingleton<DisplayItemCollection>();
@@ -77,7 +78,6 @@ namespace SupCom2ModPackager.Utility
 
                     services.AddSingleton<MainWindow>();
                     services.AddTransient<SourcesViewControl>();
-                    services.AddTransient<PathLinkControl>();
                     services.AddTransient<DisplayItemsControl>();
 
                 })

@@ -6,7 +6,7 @@ namespace SupCom2ModPackager.Models;
 
 public class DisplayItemDirectory : DisplayItem
 {
-    public static readonly DisplayItemDirectory Bogus = new(DisplayItemCollection.Empty, new DirectoryInfo(@"C:\Bogus"));
+    public static readonly DisplayItemDirectory Bogus = new(new DisplayItemCollection(), new DirectoryInfo(@"C:\Bogus"));
     private readonly DirectoryInfo info;
 
     public override string Name => info.Name;
@@ -15,7 +15,7 @@ public class DisplayItemDirectory : DisplayItem
     public override DateTime Modified => info.LastWriteTime;
     public override bool Exists => info.Exists;
 
-    public DisplayItemDirectory(DisplayItemCollection collection, DirectoryInfo info) : base(collection)
+    public DisplayItemDirectory(DisplayItemCollection collection, DirectoryInfo info) : base()
     {
         this.info = info;
     }

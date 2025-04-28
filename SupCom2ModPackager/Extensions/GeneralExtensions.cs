@@ -11,6 +11,14 @@ namespace SupCom2ModPackager.Extensions
         public static readonly string[] SupCom2Files = ["mod.zip", "meta.txt", "profile.yml"];
         private static readonly IList EmptyList = new List<object>();
 
+        public static void ForEach<T>(this IEnumerable<T> list, Action<T> action)
+        {
+            foreach (var item in list)
+            {
+                action(item);
+            }
+        }
+
         public static bool IsCompressedFile(this string fileName)
         {
             var extension = Path.GetExtension(fileName)?.ToLowerInvariant();

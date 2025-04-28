@@ -1,20 +1,22 @@
 ﻿using System.ComponentModel;
+using System.IO.Packaging;
 
 namespace SupCom2ModPackager.Utility
 {
-    public class SharedData : INotifyPropertyChanged
+    public class SharedData
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler? CurrentPathChanged;
 
         private string _currentPath = string.Empty;
-        public string CurrentPath { 
+        public string CurrentPath
+        {
             get => _currentPath;
             set
             {
                 if (!EqualityComparer<string>.Default.Equals(_currentPath, value))
                 {
                     _currentPath = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentPath)));
+                    CurrentPathChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

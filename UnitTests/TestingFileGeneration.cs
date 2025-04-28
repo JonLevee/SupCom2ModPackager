@@ -27,13 +27,14 @@ namespace UnitTests
             //if (Directory.Exists(TestPathStubs))
             //    Directory.Delete(TestPathStubs, true);
             Directory.CreateDirectory(testPathStubs);
-            var items = ServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
-            var packager = ServiceLocator.GetService<SC2ModPackager>() ?? throw new InvalidOperationException("");
+            var items = ServiceLocator.GetRequiredService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
+            var packager = ServiceLocator.GetRequiredService<SC2ModPackager>() ?? throw new InvalidOperationException("");
+            var sharedData = ServiceLocator.GetRequiredService<SharedData>() ?? throw new InvalidOperationException("");
             var progress = new Progress<PackProgressArgs>(args =>
             {
             });
             var collection = ServiceLocator.GetService<DisplayItemCollection>() ?? throw new InvalidOperationException("");
-            collection.Path = testPathFull;
+            sharedData.CurrentPath = testPathFull;
 
 
             foreach (var item in collection.Files.ToList())

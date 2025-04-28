@@ -2,51 +2,17 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Shapes;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.VisualBasic;
-using RtfPipe.Tokens;
-using SupCom2ModPackager.Extensions;
 using SupCom2ModPackager.Models;
 using SupCom2ModPackager.Utility;
 
 namespace SupCom2ModPackager.Collections;
-
 public class DisplayItemCollection : ObservableCollection<IDisplayItem>
 {
-    public static readonly DisplayItemCollection Empty = new(null!);
-    private readonly SharedData sharedData;
+    private readonly SharedData sharedData = ServiceLocator.GetRequiredService<SharedData>();
     private readonly FileSystemWatcher _fileSystemWatcher;
 
-    private string path = string.Empty;
-    public string Path
+    public DisplayItemCollection()
     {
-        get => path;
-        set
-        {
-            if (!EqualityComparer<string>.Default.Equals(path, value))
-            {
-                path = value;
-                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Path)));
-                Load();
-            }
-        }
-    }
-
-    public DisplayItemCollection(SharedData sharedData)
-    {
-        _fileSystemWatcher = null!;
-        this.sharedData = null!;
-        if (sharedData == null)
-            return;
-        this.sharedData = sharedData;
-        sharedData.PropertyChanged += (sender, e) =>
-        {
-            if (e.PropertyName == nameof(sharedData.CurrentPath))
-            {
-                Path = sharedData.CurrentPath;
-            }
-        };
         _fileSystemWatcher = new FileSystemWatcher
         {
             IncludeSubdirectories = false,
@@ -91,9 +57,9 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>
     {
         if (string.IsNullOrEmpty(sharedData.CurrentPath) || !Directory.Exists(sharedData.CurrentPath))
             return;
-        _path = path;
+        _fileSystemWatcher.EnableRaisingEvents = false;
+
         Clear();
-        _fileSystemWatcher.Path = sharedData.CurrentPath;
         var directoryInfo = new DirectoryInfo(sharedData.CurrentPath);
         Add(new DisplayItemDirectoryParent(this, directoryInfo));
 
@@ -105,6 +71,7 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>
         {
             Add(new DisplayItemDirectory(this, directory));
         }
+        _fileSystemWatcher.Path = sharedData.CurrentPath;
         _fileSystemWatcher.EnableRaisingEvents = true;
     }
 }

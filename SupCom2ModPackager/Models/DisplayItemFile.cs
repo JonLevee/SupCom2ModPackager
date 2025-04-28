@@ -16,21 +16,7 @@ public class DisplayItemFile : DisplayItem
 
     public string UnpackDirectoryPath => Path.ChangeExtension(FullPath, null);
 
-    public DisplayItemDirectory UnpackDirectory
-    {
-        get
-        {
-            var unpackDirectoryPath = UnpackDirectoryPath;
-            var targetDirectory = collection
-                .Where(item => item is DisplayItemDirectory)
-                .Cast<DisplayItemDirectory>()
-                .FirstOrDefault(dirItem => string.Equals(unpackDirectoryPath, dirItem.FullPath, StringComparison.OrdinalIgnoreCase));
-            return targetDirectory ?? DisplayItemDirectory.Bogus;
-        }
-    }
-
-
-    public DisplayItemFile(DisplayItemCollection collection, FileInfo info) : base(collection)
+    public DisplayItemFile(DisplayItemCollection collection, FileInfo info) : base()
     {
         this.info = info;
     }

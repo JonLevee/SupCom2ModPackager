@@ -12,12 +12,8 @@ namespace SupCom2ModPackager;
 
 public class SC2ModPackager
 {
-    public static readonly SC2ModPackager Empty = new(DisplayItemCollection.Empty);
-    private readonly DisplayItemCollection _items;
-
-    public SC2ModPackager(DisplayItemCollection items)
+    public SC2ModPackager()
     {
-        this._items = items;
     }
 
     public bool CanUnpack(DisplayItemFile itemFile)
@@ -38,13 +34,13 @@ public class SC2ModPackager
         {
             if (!overWrite)
                 throw new InvalidOperationException("Handle overWrite error");
-            progress.Report($"Removing {Path.GetFileName(itemFile.UnpackDirectoryPath)} ..." );
+            progress.Report($"Removing {Path.GetFileName(itemFile.UnpackDirectoryPath)} ...");
             Directory.Delete(itemFile.UnpackDirectoryPath, true);
         }
 
         Directory.CreateDirectory(itemFile.UnpackDirectoryPath);
 
-        progress.Report($"Scanning {itemFile.Name} ..." );
+        progress.Report($"Scanning {itemFile.Name} ...");
         var count = await Task.Run(() => GetCountOfItemsToExtract(itemFile.FullPath));
         itemFile.ProgressMaximum = count;
         itemFile.ProgressValue = 0;
@@ -59,7 +55,7 @@ public class SC2ModPackager
 
     private static async Task UnpackAsyncInternal(string path, IProgress<string> progress)
     {
-        Guard.Requires(!string.IsNullOrEmpty(path), $"Invalid path [{path.GetNullOrEmpty()}]");
+        Guard.Requires(!string.IsNullOrEmpty(path), $"Invalid _currentDirectory [{path.GetNullOrEmpty()}]");
         Guard.Requires(path.IsCompressedFile(), path.GetCompressedFileNameExtensionError());
 
         var directory = Path.ChangeExtension(path, null);
@@ -126,7 +122,7 @@ public class SC2ModPackager
 
     private static async Task UnpackAsyncInternal_delete(string path, IProgress<PackProgressArgs> progress)
     {
-        Guard.Requires(!string.IsNullOrEmpty(path), $"Invalid path [{path.GetNullOrEmpty()}]");
+        Guard.Requires(!string.IsNullOrEmpty(path), $"Invalid _currentDirectory [{path.GetNullOrEmpty()}]");
         Guard.Requires(path.IsCompressedFile(), path.GetCompressedFileNameExtensionError());
 
         var directory = Path.ChangeExtension(path, null);

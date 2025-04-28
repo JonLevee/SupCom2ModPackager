@@ -25,14 +25,7 @@ public interface IDisplayItem : INotifyPropertyChanged
 [DebuggerDisplay("{Name} Exists:{Exists}")]
 public class DisplayItem : IDisplayItem
 {
-    private string statusText = string.Empty;
-    private Visibility statusTextVisible = Visibility.Collapsed;
-    private Visibility progressVisible = Visibility.Collapsed;
-    private Visibility columnsVisible = Visibility.Collapsed;
-
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected readonly DisplayItemCollection collection = DisplayItemCollection.Empty;
 
     public virtual string Name => throw new NotImplementedException();
     public virtual string NameSort => throw new NotImplementedException();
@@ -41,40 +34,18 @@ public class DisplayItem : IDisplayItem
     public virtual DateTime ModifiedSort => Modified;
     public virtual bool Exists => throw new NotImplementedException();
 
-    public Visibility StatusTextVisible
-    {
-        get => statusTextVisible;
-        set => SetValue(value, ref statusTextVisible);
-    }
-    public Visibility ProgressVisible
-    {
-        get => progressVisible;
-        set => SetValue(value, ref progressVisible);
-    }
-
-    public Visibility ColumnsVisible
-    {
-        get => columnsVisible;
-        set => SetValue(value, ref columnsVisible);
-    }
-    public string StatusText
-    {
-        get => statusText;
-        set => SetValue(value, ref statusText);
-    }
-
     private double progressMaximum = 100;
     public double ProgressMaximum
     {
         get => progressMaximum;
-        set => SetValue(value, ref progressMaximum);
+        set => SetProperty(ref progressMaximum, value);
     }
 
     private double progressValue = 0;
     public double ProgressValue
     {
         get => progressValue;
-        set => SetValue(value, ref progressValue);
+        set => SetProperty(ref progressValue, value);
     }
 
     private Visibility statusTextVisible = Visibility.Collapsed;
@@ -96,32 +67,18 @@ public class DisplayItem : IDisplayItem
         get => progressVisible;
         set => SetProperty(ref progressVisible, value);
     }
-    private double progressValue = 2;
-    public double ProgressValue
-    {
-        get => progressValue;
-        set => SetProperty(ref progressValue, value);
-    }
-    private double progressMaximum = 10;
-    public double ProgressMaximum
-    {
-        get => progressMaximum;
-        set => SetProperty(ref progressMaximum, value);
-    }
     private Visibility columnsVisible = Visibility.Visible;
     public Visibility ColumnsVisible
     {
         get => columnsVisible;
         set => SetProperty(ref columnsVisible, value);
     }
-    private DisplayItem() { }
 
-    protected DisplayItem(DisplayItemCollection collection)
+    protected DisplayItem()
     {
-        this.collection = collection;
     }
 
-    protected void SetValue<T>(T value, ref T backingField, [CallerMemberName] string memberName = null!)
+    protected void SetProperty<T>(ref T backingField, T value, [CallerMemberName] string memberName = null!)
     {
         if (!EqualityComparer<T>.Default.Equals(backingField, value))
         {

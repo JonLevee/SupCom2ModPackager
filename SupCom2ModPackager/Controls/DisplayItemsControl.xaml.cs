@@ -10,6 +10,8 @@ using SupCom2ModPackager.Collections;
 using Vis = System.Windows.Visibility;
 using System.Windows.Media;
 using System.Windows;
+using System.Diagnostics;
+using System.Text;
 
 namespace SupCom2ModPackager.Controls
 {
@@ -18,10 +20,13 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class DisplayItemsControl : UserControl
     {
+
         private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
         private readonly SC2ModPackager _modPackager = ServiceLocator.GetRequiredService<SC2ModPackager>();
         private readonly SupCom2ModPackagerSettings settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
         private readonly DocumentToHtmlConverter documentToHtmlConverter = ServiceLocator.GetRequiredService<DocumentToHtmlConverter>();
+        private readonly SharedData sharedData = ServiceLocator.GetRequiredService<SharedData>();
+        private readonly SteamInfo steamInfo = ServiceLocator.GetRequiredService<SteamInfo>();
 
         public DisplayItemsControl()
         {
@@ -39,6 +44,11 @@ namespace SupCom2ModPackager.Controls
             PathDataGrid.SelectionChanged += ContentDisplayHandler;
             CommandUnpack.Visibility = Vis.Collapsed;
             CommandPack.Visibility = Vis.Collapsed;
+
+            sharedData.CurrentPathChanged += (sender, e) =>
+            {
+                SetPath();
+            };
         }
 
 
@@ -159,6 +169,55 @@ namespace SupCom2ModPackager.Controls
             //    // Reset UI after completion
             //    ExtractionProgress.Visibility = Vis.Hidden;
             //}
+        }
+
+        private void OpenCurrentDirectoryButton(object sender, RoutedEventArgs e)
+        {
+            Process.Start("explorer.exe", sharedData.CurrentPath);
+        }
+
+        private void OpenGamedataButton(object sender, RoutedEventArgs e)
+        {
+            var root = steamInfo.GetRoot("Supreme Commander 2");
+            var gamedata = Path.Combine(root, "gamedata");
+            Process.Start("explorer.exe", gamedata);
+        }
+
+        private void PathButtonClicked(object sender, RoutedEventArgs e)
+        {
+            sharedData.CurrentPath = (string)((Button)sender).Tag;
+        }
+
+        private void SetPath()
+        {
+            var sb = new StringBuilder();
+            var pathParts = sharedData.CurrentPath.Split(Path.DirectorySeparatorChar);
+            PathPanel.Children.Cast<TextBlock>().ForEach(child => child.MouseLeftButtonUp -= PathButtonClicked);
+            foreach (FrameworkElement child in PathPanel.Children)
+            {
+                if (child.Tag != null)
+                {
+                    child.MouseLeftButtonUp -= PathButtonClicked;
+                }
+            }
+
+            PathPanel.Children.Clear();
+            for (int i = 0; i < pathParts.Length; i++)
+            {
+                var pathPart = pathParts[i];
+                if (i == 0)
+                {
+                    sb.Append(pathPart);
+                }
+                else
+                {
+                    PathPanel.Children.Add(new TextBlock { Text = ">" });
+                    sb.Append(Path.DirectorySeparatorChar);
+                    sb.Append(pathPart);
+                }
+                PathPanel.Children.Add(new TextBlock { Text = pathPart, Tag = sb.ToString() });
+            }
+            _items.Load();
         }
     }
 

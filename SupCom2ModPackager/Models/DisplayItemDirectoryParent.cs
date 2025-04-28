@@ -20,7 +20,7 @@ public class DisplayItemDirectoryParent : DisplayItem
 
     public ListSortDirection SortDirection { get; set; } = ListSortDirection.Ascending;
 
-    public DisplayItemDirectoryParent(DisplayItemCollection collection, DirectoryInfo info) : base(collection)
+    public DisplayItemDirectoryParent(DisplayItemCollection collection, DirectoryInfo info) : base()
     {
         this.info = info;
     }
