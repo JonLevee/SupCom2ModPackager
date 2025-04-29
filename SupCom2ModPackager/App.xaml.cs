@@ -50,7 +50,7 @@ namespace SupCom2ModPackager
             var sharedData = ServiceLocator.GetRequiredService<SharedData>();
             var modSettings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
 
-            sharedData.CurrentPath = modSettings.InstalledModsFolder;
+            sharedData.CurrentPath = modSettings.ModLibraryFolder;
 
             mainWindow.Show();
         }

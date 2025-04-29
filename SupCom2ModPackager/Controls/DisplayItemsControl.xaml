@@ -55,7 +55,9 @@
             </Grid.ColumnDefinitions>
             <DataGrid 
                     x:Name="PathDataGrid" 
+                    ItemsSource="{Binding Path=Items, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     Grid.Column="0"
+                    Visibility="Visible"
                     AutoGenerateColumns="False" 
                     Margin="0,0,0,0" 
                     HorizontalAlignment="Left"
@@ -63,7 +65,12 @@
                     SelectionMode="Single" 
                     SelectionUnit="FullRow"
                     CanUserSortColumns="True"
-                    Sorting="PathDataGrid_Sorting">
+                    Sorting="PathDataGrid_Sorting"
+                    AllowDrop="True" 
+                    DragEnter="PathDataGrid_DragEnter"
+                    Drop="PathDataGrid_Drop"
+                    PreviewMouseMove="PathDataGrid_PreviewMouseMove"
+                    PreviewKeyDown="PathDataGrid_PreviewKeyDown">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <!-- Add any row-specific styling here -->

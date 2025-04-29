@@ -90,13 +90,12 @@ namespace SupCom2ModPackager.Utility
             var appName = Assembly.GetExecutingAssembly().GetName().Name!;
             var appSettings = new SupCom2ModPackagerSettings
             {
-                AppName = Assembly.GetExecutingAssembly().GetName().Name!,
+                AppName = appName,
+                ApplicationDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appName),
             };
-            appSettings.ApplicationDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appName);
-            appSettings.InstalledModsFolder = Path.Combine(appSettings.ApplicationDataFolder, "InstalledMods");
-            appSettings.UserSettingsFile = Path.Combine(appSettings.ApplicationDataFolder, "userSettings.json");
             Directory.CreateDirectory(appSettings.ApplicationDataFolder);
-            Directory.CreateDirectory(appSettings.InstalledModsFolder);
+            Directory.CreateDirectory(appSettings.ModLibraryFolder);
+            Directory.CreateDirectory(appSettings.ModEditingFolder);
             if (!File.Exists(appSettings.UserSettingsFile))
             {
                 var userSettings = new SupCom2ModPackagerUserSettings();

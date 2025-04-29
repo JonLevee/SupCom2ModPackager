@@ -20,25 +20,26 @@ namespace SupCom2ModPackager.Controls
     /// </summary>
     public partial class DisplayItemsControl : UserControl
     {
-
-        private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
         private readonly SC2ModPackager _modPackager = ServiceLocator.GetRequiredService<SC2ModPackager>();
-        private readonly SupCom2ModPackagerSettings settings = ServiceLocator.GetRequiredService<SupCom2ModPackagerSettings>();
         private readonly DocumentToHtmlConverter documentToHtmlConverter = ServiceLocator.GetRequiredService<DocumentToHtmlConverter>();
         private readonly SharedData sharedData = ServiceLocator.GetRequiredService<SharedData>();
         private readonly SteamInfo steamInfo = ServiceLocator.GetRequiredService<SteamInfo>();
+
+        private readonly DisplayItemCollection _items = ServiceLocator.GetRequiredService<DisplayItemCollection>();
+        public DisplayItemCollection Items { get => _items; }
 
         public DisplayItemsControl()
         {
 
             InitializeComponent();
-
-
-            PathDataGrid.ItemsSource = _items;
+            //PathDataGrid.ItemsSource = _items;
             var collectionView = CollectionViewSource.GetDefaultView(PathDataGrid.ItemsSource);
-            collectionView.SortDescriptions.Clear();
-            collectionView.SortDescriptions.Add(new SortDescription(nameof(IDisplayItem.NameSort), ListSortDirection.Ascending));
-            collectionView.Refresh();
+            if (collectionView != null)
+            {
+                collectionView.SortDescriptions.Clear();
+                collectionView.SortDescriptions.Add(new SortDescription(nameof(IDisplayItem.NameSort), ListSortDirection.Ascending));
+                collectionView.Refresh();
+            }
 
             PathDataGrid.SelectionChanged += CommandButtonsVisibilityHandler;
             PathDataGrid.SelectionChanged += ContentDisplayHandler;
@@ -123,6 +124,119 @@ namespace SupCom2ModPackager.Controls
             collectionView.Refresh();
         }
 
+        private void PathDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (PathDataGrid.SelectedItem is IDisplayItem selectedItem)
+            {
+                switch (e.Key)
+                {
+                    case Key.Delete:
+                        HandleDelete(selectedItem);
+                        e.Handled = true;
+                        break;
+
+                    case Key.X when Keyboard.Modifiers.HasFlag(ModifierKeys.Control):
+                        HandleCut(selectedItem);
+                        e.Handled = true;
+                        break;
+
+                    case Key.C when Keyboard.Modifiers.HasFlag(ModifierKeys.Control):
+                        HandleCopy(selectedItem);
+                        e.Handled = true;
+                        break;
+
+                    case Key.V when Keyboard.Modifiers.HasFlag(ModifierKeys.Control):
+                        HandlePaste();
+                        e.Handled = true;
+                        break;
+                }
+            }
+        }
+
+        private void HandleDelete(IDisplayItem selectedItem)
+        {
+            if (MessageBox.Show($"Are you sure you want to delete '{selectedItem.Name}'?", "Confirm Delete", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                if (File.Exists(selectedItem.FullPath))
+                {
+                    File.Delete(selectedItem.FullPath);
+                }
+                else if (Directory.Exists(selectedItem.FullPath))
+                {
+                    Directory.Delete(selectedItem.FullPath, true);
+                }
+
+                // Refresh the grid
+                Items.Load();
+            }
+        }
+
+        private IDisplayItem? _cutItem;
+
+        private void HandleCut(IDisplayItem selectedItem)
+        {
+            _cutItem = selectedItem;
+        }
+
+        private void HandleCopy(IDisplayItem selectedItem)
+        {
+            Clipboard.SetFileDropList(new System.Collections.Specialized.StringCollection { selectedItem.FullPath });
+        }
+
+        private void HandlePaste()
+        {
+            if (_cutItem != null)
+            {
+                var targetPath = Path.Combine(sharedData.CurrentPath, Path.GetFileName(_cutItem.FullPath));
+
+                if (File.Exists(_cutItem.FullPath))
+                {
+                    File.Move(_cutItem.FullPath, targetPath);
+                }
+                else if (Directory.Exists(_cutItem.FullPath))
+                {
+                    Directory.Move(_cutItem.FullPath, targetPath);
+                }
+
+                _cutItem = null; // Clear the cut item
+            }
+            else if (Clipboard.ContainsFileDropList())
+            {
+                var files = Clipboard.GetFileDropList();
+                foreach (string file in files)
+                {
+                    var targetPath = Path.Combine(sharedData.CurrentPath, Path.GetFileName(file));
+
+                    if (File.Exists(file))
+                    {
+                        File.Copy(file, targetPath, overwrite: false);
+                    }
+                    else if (Directory.Exists(file))
+                    {
+                        CopyDirectory(file, targetPath);
+                    }
+                }
+            }
+
+            // Refresh the grid
+            Items.Load();
+        }
+
+        private void CopyDirectory(string sourceDir, string targetDir)
+        {
+            Directory.CreateDirectory(targetDir);
+
+            foreach (var file in Directory.GetFiles(sourceDir))
+            {
+                File.Copy(file, Path.Combine(targetDir, Path.GetFileName(file)), overwrite: false);
+            }
+
+            foreach (var directory in Directory.GetDirectories(sourceDir))
+            {
+                CopyDirectory(directory, Path.Combine(targetDir, Path.GetFileName(directory)));
+            }
+        }
+
         private void ActionClicked(object sender, MouseButtonEventArgs e)
         {
             //if (!((DataGrid)sender).TryGetDisplayItem(e, out string column, out DisplayItem item))
@@ -188,7 +302,94 @@ namespace SupCom2ModPackager.Controls
             sharedData.CurrentPath = (string)((Button)sender).Tag;
         }
 
+        private void PathDataGrid_DragEnter(object sender, DragEventArgs e)
+        {
+            // Check if the data being dragged is a file or folder
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy; // Show the copy cursor
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None; // Show the "not allowed" cursor
+            }
+        }
+
+        private void PathDataGrid_Drop(object sender, DragEventArgs e)
+        {
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
+            {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    // Get the dropped files/folders
+                    var droppedPaths = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                    foreach (var path in droppedPaths)
+                    {
+                        if (File.Exists(path))
+                        {
+                            var target = Path.Combine(sharedData.CurrentPath, Path.GetFileName(path));
+                            if (!File.Exists(target))
+                            {
+                                // Add the file to the collection
+                                File.Copy(path, Path.Combine(sharedData.CurrentPath, Path.GetFileName(path)), false);
+                            }
+                        }
+                        else if (Directory.Exists(path))
+                        {
+                            // Add the directory to the collection
+                            void RecursiveDirectoryCopy(string source, string target)
+                            {
+                                if (Directory.Exists(source))
+                                {
+                                    Directory.CreateDirectory(target);
+                                    foreach (var file in Directory.GetFiles(source))
+                                    {
+                                        var targetFile = Path.Combine(target, Path.GetFileName(file));
+                                        if (!File.Exists(targetFile))
+                                            // Copy the file to the target directory
+                                            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), false);
+                                    }
+                                    foreach (var directory in Directory.GetDirectories(source))
+                                    {
+                                        RecursiveDirectoryCopy(directory, Path.Combine(target, Path.GetFileName(directory)));
+                                    }
+                                }
+                            }
+                            RecursiveDirectoryCopy(path, Path.Combine(sharedData.CurrentPath, Path.GetFileName(path)));
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        private void PathDataGrid_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Get the selected item
+                if (PathDataGrid.SelectedItem is IDisplayItem selectedItem)
+                {
+                    // Start a drag-and-drop operation
+                    var data = new DataObject(DataFormats.FileDrop, new[] { selectedItem.FullPath });
+                    DragDrop.DoDragDrop(PathDataGrid, data, DragDropEffects.Copy);
+                }
+            }
+        }
+
+
         private void SetPath()
+        {
+            SetCurrentFolderBar();
+            Items.Load();
+        }
+
+        private void SetCurrentFolderBar()
         {
             var sb = new StringBuilder();
             var pathParts = sharedData.CurrentPath.Split(Path.DirectorySeparatorChar);
@@ -217,7 +418,6 @@ namespace SupCom2ModPackager.Controls
                 }
                 PathPanel.Children.Add(new TextBlock { Text = pathPart, Tag = sb.ToString() });
             }
-            _items.Load();
         }
     }
 

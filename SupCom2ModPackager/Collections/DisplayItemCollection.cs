@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
@@ -73,6 +74,7 @@ public class DisplayItemCollection : ObservableCollection<IDisplayItem>
         }
         _fileSystemWatcher.Path = sharedData.CurrentPath;
         _fileSystemWatcher.EnableRaisingEvents = true;
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 }
 
